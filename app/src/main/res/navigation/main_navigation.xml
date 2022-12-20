@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation.xml"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/allUsers"
+        android:name="com.tutorials.deviceadminsample.AllUsersFragment"
+        android:label="Admin Account"
+        tools:layout="@layout/fragment_all_users" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.tutorials.deviceadminsample.LoginFragment"
+        android:label="User Login"
+        tools:layout="@layout/fragment_login">
+
+        <action
+            android:id="@+id/action_loginFragment_to_userFragment"
+            app:destination="@id/userFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/adminLoginFragment"
+        android:name="com.tutorials.deviceadminsample.AdminLoginFragment"
+        android:label="Admin Login"
+        tools:layout="@layout/fragment_admin_login">
+
+        <action
+            android:id="@+id/action_adminLoginFragment_to_allUsers2"
+            app:destination="@id/allUsers" />
+    </fragment>
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="com.tutorials.deviceadminsample.UserFragment"
+        android:label="User Account"
+        tools:layout="@layout/fragment_user" />
+</navigation>
