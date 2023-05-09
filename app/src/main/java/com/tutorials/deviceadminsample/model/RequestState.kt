@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.model
 
 sealed class RequestState {
     class Successful(val data: Boolean) : RequestState()

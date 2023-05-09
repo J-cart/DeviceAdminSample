@@ -1,14 +1,9 @@
 package com.tutorials.deviceadminsample
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.TimePicker
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -18,10 +13,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentAllUsersBinding
-import kotlinx.coroutines.Dispatchers
+import com.tutorials.deviceadminsample.model.Resource
+import com.tutorials.deviceadminsample.model.User
+import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
+import com.tutorials.deviceadminsample.util.ALARM
+import com.tutorials.deviceadminsample.util.LOCK
+import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 

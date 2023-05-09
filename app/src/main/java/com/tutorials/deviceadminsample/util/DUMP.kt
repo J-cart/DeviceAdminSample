@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.util
 
 import android.app.KeyguardManager
 import android.app.admin.DevicePolicyManager

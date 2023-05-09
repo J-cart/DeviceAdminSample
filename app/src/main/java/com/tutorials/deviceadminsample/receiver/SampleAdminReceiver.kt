@@ -1,10 +1,11 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.receiver
 
 import android.app.admin.DeviceAdminReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.tutorials.deviceadminsample.util.ADMIN_ACCESS
+import com.tutorials.deviceadminsample.util.SharedPreference
 
 class SampleAdminReceiver:DeviceAdminReceiver() {
     override fun onEnabled(context: Context, intent: Intent) {

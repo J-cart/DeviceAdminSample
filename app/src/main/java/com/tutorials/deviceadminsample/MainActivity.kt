@@ -11,10 +11,14 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.databinding.ActivityMainBinding
+import com.tutorials.deviceadminsample.receiver.SampleAdminReceiver
+import com.tutorials.deviceadminsample.util.ADMIN_ACCESS
+import com.tutorials.deviceadminsample.util.SharedPreference
+import com.tutorials.deviceadminsample.util.USERS
+import com.tutorials.deviceadminsample.util.showAlert
 
 
 class MainActivity : AppCompatActivity() {

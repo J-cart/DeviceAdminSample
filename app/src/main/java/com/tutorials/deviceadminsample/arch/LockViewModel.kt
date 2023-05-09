@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.arch
 
 import android.content.Context
 import android.util.Log
@@ -10,8 +10,12 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.tutorials.deviceadminsample.FirebaseMessagingReceiver.Companion.updateToken
-import com.tutorials.deviceadminsample.FirebaseMessagingReceiver.Companion.updateTokenAdmin
+import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateToken
+import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateTokenAdmin
+import com.tutorials.deviceadminsample.model.RequestState
+import com.tutorials.deviceadminsample.model.Resource
+import com.tutorials.deviceadminsample.model.User
+import com.tutorials.deviceadminsample.util.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

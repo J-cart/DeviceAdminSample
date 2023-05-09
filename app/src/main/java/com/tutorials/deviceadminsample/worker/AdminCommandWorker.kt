@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.worker
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -11,10 +11,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.tutorials.deviceadminsample.receiver.AlarmReceiver
+import com.tutorials.deviceadminsample.receiver.SampleAdminReceiver
+import com.tutorials.deviceadminsample.util.ALARM
+import com.tutorials.deviceadminsample.util.ALARM_TIME
+import com.tutorials.deviceadminsample.util.COMMAND_TYPE
+import com.tutorials.deviceadminsample.util.LOCK
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 class AdminCommandWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
@@ -22,11 +27,11 @@ class AdminCommandWorker(context: Context, params: WorkerParameters) : Coroutine
         val alarmTime = inputData.getLong(ALARM_TIME,0L)
         return try {
             when(data){
-                LOCK->{
+                LOCK ->{
                     lockDevice(applicationContext)
                     Result.success()
                 }
-                ALARM->{
+                ALARM ->{
                     Log.d("CLOUD_MSG", "new time --->$alarmTime")
                     doAlarm(alarmTime)
                     Result.success()

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,7 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentAdminLoginBinding
+import com.tutorials.deviceadminsample.model.RequestState
 import kotlinx.coroutines.launch
 
 class AdminLoginFragment : Fragment() {

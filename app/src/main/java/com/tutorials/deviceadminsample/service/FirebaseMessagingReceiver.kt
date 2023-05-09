@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,14 +15,13 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.tutorials.deviceadminsample.*
+import com.tutorials.deviceadminsample.model.User
+import com.tutorials.deviceadminsample.util.*
+import com.tutorials.deviceadminsample.worker.AdminCommandWorker
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 
 private val fStoreUsers = Firebase.firestore.collection(USERS).document(USER).collection("ALL")

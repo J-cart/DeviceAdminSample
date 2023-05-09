@@ -3,7 +3,6 @@ package com.tutorials.deviceadminsample
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.activityViewModels
@@ -12,9 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.tutorials.deviceadminsample.FirebaseMessagingReceiver.Companion.upcomingAlarmTime
-import com.tutorials.deviceadminsample.FirebaseMessagingReceiver.Companion.updateToken
+import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.upcomingAlarmTime
+import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateToken
+import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentUserBinding
+import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,7 +48,8 @@ class UserFragment : Fragment() {
               if (it == 0L){
                   binding.textView.text = "Upcoming Alarm for this device account \n -- awaiting time"
               }else{
-                  binding.textView.text = "Upcoming Alarm for this device account \n -- ${ SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(it)}"
+                  binding.textView.text = "Upcoming Alarm for this device account \n -- ${ SimpleDateFormat(
+                      TIME_FORMAT_ONE, Locale.getDefault()).format(it)}"
               }
           }
       }

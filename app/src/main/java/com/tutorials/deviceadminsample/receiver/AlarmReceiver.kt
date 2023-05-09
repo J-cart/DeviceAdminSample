@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.receiver
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,6 +13,11 @@ import android.os.Vibrator
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.tutorials.deviceadminsample.*
+import com.tutorials.deviceadminsample.util.CHANNEL_ID
+import com.tutorials.deviceadminsample.util.NOTIFICATION_TITLE
+import com.tutorials.deviceadminsample.util.VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION
+import com.tutorials.deviceadminsample.util.VERBOSE_NOTIFICATION_CHANNEL_NAME
 
 
 class AlarmReceiver : BroadcastReceiver() {

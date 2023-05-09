@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".SampleAdminReceiver"
+        <receiver android:name=".receiver.SampleAdminReceiver"
             android:label="@string/sample_device_admin"
             android:description="@string/sample_device_admin_description"
             android:permission="android.permission.BIND_DEVICE_ADMIN"
@@ -40,7 +40,7 @@
         </receiver>
 
         <service
-            android:name=".FirebaseMessagingReceiver"
+            android:name=".service.FirebaseMessagingReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -48,7 +48,7 @@
         </service>
 
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".receiver.AlarmReceiver"
             android:enabled="true"
             android:exported="false" />
     </application>
