@@ -9,12 +9,18 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.upcomingAlarmTime
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateToken
 import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.databinding.ActionConfirmationDialogBinding
+import com.tutorials.deviceadminsample.databinding.AuthConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.FragmentUserBinding
+import com.tutorials.deviceadminsample.util.ACTION_GIF_URL
+import com.tutorials.deviceadminsample.util.AUTH_GIF_URL
 import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -38,22 +44,20 @@ class UserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.profileImg.clipToOutline = true
        fUser?.email?.let {
-           (activity as MainActivity).supportActionBar?.title = it
            viewModel.addUserSnapshot(it)
         }?: "User Account"
-        userStatus()
-      lifecycleScope.launch {
-          upcomingAlarmTime.collect{
-              if (it == 0L){
-                  binding.textView.text = "Upcoming Alarm for this device account \n -- awaiting time"
-              }else{
-                  binding.textView.text = "Upcoming Alarm for this device account \n -- ${ SimpleDateFormat(
-                      TIME_FORMAT_ONE, Locale.getDefault()).format(it)}"
-              }
-          }
-      }
-        newMenu()
+        //userStatus()
+        //newMenu()
+        binding.apply {
+            alarmBtn.setOnClickListener {
+                showConfirmationDialog()
+            }
+            lockText.setOnClickListener {
+                showActionDialog()
+            }
+        }
     }
 
     private fun newMenu() {
@@ -93,6 +97,43 @@ class UserFragment : Fragment() {
                     }
                     is LockViewModel.UserEvents.Error -> Unit
                 }
+            }
+        }
+    }
+
+    private fun showActionDialog(){
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.action_confirmation_dialog,binding.root,false)
+        val binding = ActionConfirmationDialogBinding.bind(dialogView)
+        val newDialog = MaterialAlertDialogBuilder(requireContext()).create()
+        if (dialogView.parent != null){
+            (dialogView.parent as ViewGroup).removeView(binding.root)
+        }
+        newDialog.setView(binding.root)
+        newDialog.show()
+
+        binding.apply {
+            Glide.with(requireContext()).load(R.raw.action).into(binding.iconImg)
+//            Glide.with(requireContext()).load(ACTION_GIF_URL).into(binding.iconImg)
+            declineBtn.setOnClickListener {
+                newDialog.dismiss()
+            }
+        }
+    }
+ private fun showConfirmationDialog(){
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.auth_confirmation_dialog,binding.root,false)
+        val binding = AuthConfirmationDialogBinding.bind(dialogView)
+        val newDialog = MaterialAlertDialogBuilder(requireContext()).create()
+        if (dialogView.parent != null){
+            (dialogView.parent as ViewGroup).removeView(binding.root)
+        }
+        newDialog.setView(binding.root)
+        newDialog.show()
+
+        binding.apply {
+            Glide.with(requireContext()).load(R.raw.authgif).into(binding.iconImg)
+//            Glide.with(requireContext()).load(AUTH_GIF_URL).into(binding.iconImg)
+            doneBtn.setOnClickListener {
+                newDialog.dismiss()
             }
         }
     }

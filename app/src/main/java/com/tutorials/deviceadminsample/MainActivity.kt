@@ -15,10 +15,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.databinding.ActivityMainBinding
 import com.tutorials.deviceadminsample.receiver.SampleAdminReceiver
-import com.tutorials.deviceadminsample.util.ADMIN_ACCESS
-import com.tutorials.deviceadminsample.util.SharedPreference
-import com.tutorials.deviceadminsample.util.USERS
-import com.tutorials.deviceadminsample.util.showAlert
+import com.tutorials.deviceadminsample.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,9 +31,10 @@ class MainActivity : AppCompatActivity() {
         SharedPreference.init(applicationContext)
         appBarConfiguration = AppBarConfiguration(
             setOf(
+                R.id.boardingFragment,
                 R.id.loginFragment,
                 R.id.allUsers,
-                R.id.adminLoginFragment,R.id.userFragment
+                R.id.userFragment
             )
         )
 
@@ -44,30 +42,7 @@ class MainActivity : AppCompatActivity() {
         navController = fragHost.findNavController()
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                //TODO fix--me
-                R.id.loginFragment -> {
-                    binding.apply {
-                        toggleModeBtn.isVisible= true
-                        adminText.isVisible= true
-                    }
-                    supportActionBar?.hide()
-                }
-                R.id.adminLoginFragment -> {
-                    supportActionBar?.hide()
-                    binding.apply {
-                        toggleModeBtn.isVisible= true
-                        adminText.isVisible= true
-                    }
-                }
-                else -> {
-                    supportActionBar?.show()
-                    binding.apply {
-                        toggleModeBtn.isVisible= false
-                        adminText.isVisible= false
-                    }
-                }
-            }
+            //some thing
         }
         val msg = "You need to allow permission for app to work properly"
         val title = "ACCEPT ADMIN REQUEST"
@@ -81,23 +56,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent2)
             }
             return
-        }
-
-       // setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.toggleModeBtn.setOnCheckedChangeListener { _, isChecked ->
-            Toast.makeText(
-                this,
-                if (isChecked) "Geek Mode ON" else "Geek Mode OFF",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            if (isChecked) {
-                navController.navigate(R.id.adminLoginFragment)
-            } else {
-                navController.navigate(R.id.loginFragment)
-            }
-
-
         }
 
     }

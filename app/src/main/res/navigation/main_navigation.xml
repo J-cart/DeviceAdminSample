@@ -3,13 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_navigation.xml"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/boardingFragment">
 
     <fragment
         android:id="@+id/allUsers"
         android:name="com.tutorials.deviceadminsample.AllUsersFragment"
         android:label="Admin Account"
-        tools:layout="@layout/fragment_all_users" />
+        tools:layout="@layout/fragment_all_users" >
+        <action
+            android:id="@+id/action_allUsers_to_userFragment"
+            app:destination="@id/userFragment" />
+    </fragment>
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.tutorials.deviceadminsample.LoginFragment"
@@ -19,20 +23,52 @@
         <action
             android:id="@+id/action_loginFragment_to_userFragment"
             app:destination="@id/userFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/adminLoginFragment"
-        android:name="com.tutorials.deviceadminsample.AdminLoginFragment"
-        android:label="Admin Login"
-        tools:layout="@layout/fragment_admin_login">
-
         <action
-            android:id="@+id/action_adminLoginFragment_to_allUsers2"
-            app:destination="@id/allUsers" />
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
     </fragment>
     <fragment
         android:id="@+id/userFragment"
         android:name="com.tutorials.deviceadminsample.UserFragment"
         android:label="User Account"
         tools:layout="@layout/fragment_user" />
+    <fragment
+        android:id="@+id/boardingFragment"
+        android:name="com.tutorials.deviceadminsample.onboarding.BoardingFragment"
+        android:label="fragment_boarding"
+        tools:layout="@layout/fragment_boarding" >
+        <action
+            android:id="@+id/action_boardingFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.tutorials.deviceadminsample.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" >
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_otpVerificationFragment"
+            app:destination="@id/otpVerificationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPasswordFragment"
+        android:name="com.tutorials.deviceadminsample.NewPasswordFragment"
+        android:label="fragment_new_password"
+        tools:layout="@layout/fragment_new_password" >
+        <action
+            android:id="@+id/action_newPasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/otpVerificationFragment"
+        android:name="com.tutorials.deviceadminsample.OtpVerificationFragment"
+        android:label="fragment_otp_verification"
+        tools:layout="@layout/fragment_otp_verification" >
+        <action
+            android:id="@+id/action_otpVerificationFragment_to_newPasswordFragment"
+            app:destination="@id/newPasswordFragment" />
+    </fragment>
 </navigation>

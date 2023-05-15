@@ -35,14 +35,14 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (fUser != null) {
+        /*if (fUser != null) {
             if (!fUser.email!!.contains("admin",true)){
                 val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
                 findNavController().navigate(navigate)
                 return
             }
             findNavController().navigate(R.id.adminLoginFragment)
-        }
+        }*/
         validateUser()
 
     }
@@ -50,7 +50,7 @@ class LoginFragment : Fragment() {
     private fun validateUser() {
 
         binding.loginLayout.apply {
-            signUpTxt.setOnClickListener {
+            createAccText.setOnClickListener {
                 emailEdt.setText("")
                 passEdt.setText("")
                 this.root.isVisible = false
@@ -58,13 +58,16 @@ class LoginFragment : Fragment() {
             }
 
             loginBtn.setOnClickListener {
+                val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
+                findNavController().navigate(navigate)
+/*
                 lifecycleScope.launch {
                     if(emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()){
                         emailBox.error = "Required,Empty Field*"
                         return@launch
                     }
                     if (emailEdt.text!!.contains("admin",true)) {
-                        emailBox.error = "Required, Invalid ADMIN login*"
+                        emailBox.error = "Required, Invalid (ADMIN) login*"
                         return@launch
                     }
                     viewModel.loginUser(requireContext(),emailEdt.text.toString(), passEdt.text.toString())
@@ -97,6 +100,7 @@ class LoginFragment : Fragment() {
                     }
 
                 }
+*/
 
 
             }
@@ -107,14 +111,17 @@ class LoginFragment : Fragment() {
 
 
         binding.signUpLayout.apply {
-            loginTxt.setOnClickListener {
+            signInText.setOnClickListener {
                 emailEdt.setText("")
                 passEdt.setText("")
                 this.root.isVisible = false
                 binding.loginLayout.root.isVisible = true
             }
 
-            signUpBtn.setOnClickListener {
+            createAccBtn.setOnClickListener {
+                val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
+                findNavController().navigate(navigate)
+/*
                 lifecycleScope.launch {
                     if(emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()){
                         emailBox.error = "Required,Empty Field*"
@@ -156,6 +163,7 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
+*/
             }
         }
     }

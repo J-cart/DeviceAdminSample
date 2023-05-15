@@ -1,22 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".AllUsersFragment">
 
-    <!-- TODO: view/search all users and send friend request -->
     <TextView
-        android:id="@+id/statusTv"
+        android:id="@+id/hello_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="31dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:textColor="@color/purple_600"
+        android:textSize="24dp"
+        app:fontFamily="@font/poppins_medium"
+        app:layout_constraintEnd_toStartOf="@+id/profile_img"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Hello noobmaster69" />
+    <ImageView
+        android:id="@+id/profile_img"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_marginEnd="37dp"
+        android:background="@drawable/profile_img_background"
+        android:clipToOutline="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/profile_img"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hello_text" />
+
+    <TextView
+        android:id="@+id/info_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/hello_text"
+        app:layout_constraintStart_toStartOf="@+id/hello_text"
+        app:layout_constraintTop_toBottomOf="@id/hello_text"
+        android:text="Welcome back noobmaster69" />
+
+    <TextView
+        android:id="@+id/device_count_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="38dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="center"
+        android:textColor="@color/purple_600"
+        app:fontFamily="@font/poppins_medium"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="all users fragment" />
-
+        app:layout_constraintTop_toBottomOf="@id/info_text"
+        android:text="Total devices: 101" />
 
 
     <ProgressBar
@@ -24,10 +63,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:progressDrawable="@drawable/loading_anim"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/errorText"
@@ -35,8 +74,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="11dp"
         android:text="This App Currently Has No Users"
-        android:visibility="invisible"
         android:textAlignment="center"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
@@ -46,13 +85,16 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="38dp"
+        android:layout_marginEnd="1dp"
         android:clipToPadding="false"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/user_viewholder"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/statusTv" />
+        app:layout_constraintEnd_toEndOf="@+id/hello_text"
+        app:layout_constraintStart_toStartOf="@+id/hello_text"
+        app:layout_constraintTop_toBottomOf="@+id/device_count_text"
+        tools:listitem="@layout/device_viewholder" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,43 +7,25 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.tutorials.deviceadminsample.databinding.DeviceViewholderBinding
 import com.tutorials.deviceadminsample.databinding.UserViewholderBinding
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AllUsersAdapter: ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBack) {
+class AllUsersAdapter : ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBack) {
 
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val binding = UserViewholderBinding.bind(view)
+        private val binding = DeviceViewholderBinding.bind(view)
         fun bind(data: User) {
-           // binding.msg.text = data.toString()
-
-            try {
-                val textMe = StringBuilder()
-                textMe.append(
-                    "Display name: Device $adapterPosition\n" +
-                            "Email : ${data.email}\n" +
-                            "Account type: ${data.accountType}\n" +
-                            "Recent alarm time: ${if (data.alarmTime =="0" ){
-                                "awaiting time"
-                            }else{
-                                SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(data.alarmTime.toLong())}
-                            }"
-                )
-                binding.msg.text = textMe
-            }catch (e:Exception){
-                Log.d("me_adapter", "adapter time format error --->$e")
-            }
-
-
-            binding.lockBtn.setOnClickListener {
-                lockListener?.let { it1 -> it1(data) }
-            }
-            binding.alarmBtn.setOnClickListener {
-                alarmListener?.let { it1 -> it1(data) }
+            binding.apply {
+                nameText.text = data.deviceName
+                statusText.text = data.status
+                root.setOnClickListener {
+                    listener?.let { it(data) }
+                }
             }
         }
     }
@@ -59,7 +41,7 @@ class AllUsersAdapter: ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBac
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllUsersAdapter.ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.user_viewholder, parent, false)
+            .inflate(R.layout.device_viewholder, parent, false)
         return ViewHolder(view)
     }
 
@@ -70,16 +52,22 @@ class AllUsersAdapter: ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBac
 
     }
 
-    private var lockListener:((User)->Unit)? = null
+    private var lockListener: ((User) -> Unit)? = null
 
-    fun lockClick(listener:(User)->Unit){
+    fun lockClick(listener: (User) -> Unit) {
         this.lockListener = listener
     }
 
-private var alarmListener:((User)->Unit)? = null
+    private var alarmListener: ((User) -> Unit)? = null
 
-    fun alarmClick(listener:(User)->Unit){
+    fun alarmClick(listener: (User) -> Unit) {
         this.alarmListener = listener
+    }
+
+    private var listener: ((User) -> Unit)? = null
+
+    fun adapterClick(listener: (User) -> Unit) {
+        this.listener = listener
     }
 
 

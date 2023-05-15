@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.tutorials.deviceadminsample.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -28,6 +29,82 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+
+
+/* private val fStoreUsers1 = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
+        .document("email").collection("devices").document("")*/
+fun getData(): ArrayList<User> {
+    val items = ArrayList<User>()
+    return items.apply {
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+        add(
+            User(
+                deviceName = "Some random device",
+                status = "Not active"
+            )
+        )
+    }
+}
+
 
 /*
 fun new(){

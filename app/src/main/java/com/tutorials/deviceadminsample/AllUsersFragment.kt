@@ -21,6 +21,8 @@ import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
 import com.tutorials.deviceadminsample.util.ALARM
 import com.tutorials.deviceadminsample.util.LOCK
 import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
+import com.tutorials.deviceadminsample.util.getData
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,12 +47,28 @@ class AllUsersFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.profileImg.clipToOutline = true
         viewModel.addAllUserSnapshot()
         fUser?.email?.let {
             (activity as MainActivity).supportActionBar?.title = it
         }?: "Admin Account"
-        lifecycleScope.launch { observeAllUsers() }
-        newMenu()
+       /* lifecycleScope.launch { observeAllUsers() }
+        newMenu()*/
+        lifecycleScope.launch {
+            adapter.submitList(emptyList())
+            loadingState(true)
+            delay(1000L)
+            loadingState(false)
+            adapter.submitList(getData())
+        }
+        binding.recyclerView.adapter = adapter
+        adapter.adapterClick {
+            val action = AllUsersFragmentDirections.actionAllUsersToUserFragment()
+            findNavController().navigate(action)
+        }
+
+
+
     }
 
     private suspend fun observeAllUsers() {
@@ -71,10 +89,10 @@ class AllUsersFragment : Fragment(){
                         if (it.isNotEmpty()){
                             adapter.submitList(it)
                             errorState(false)
-                            binding.statusTv.text = "Total Users -- ${it.size}"
+                            binding.deviceCountText.text = "Total Devices - ${it.size}"
                         }else{
                             errorState(true)
-                            binding.statusTv.text = "Total Users -- 0"
+                            binding.deviceCountText.text = "Total Devices - 0"
                             adapter.submitList(emptyList())
                         }
                     } ?: emptyList<User>()
@@ -91,7 +109,7 @@ class AllUsersFragment : Fragment(){
                     resource.msg?.let {
                         binding.errorText.text = it
                         adapter.submitList(emptyList())
-                        binding.statusTv.text = "Total Users -- 0"
+                        binding.deviceCountText.text = "Total Devices - 0"
                     }
                 }
             }
@@ -117,7 +135,7 @@ class AllUsersFragment : Fragment(){
             Log.d("TIMER2","${myCalendar.time}")
             Log.d("TIMER3","${myCalendar.timeInMillis}")
             viewModel.sendPushNotifier(user.copy(commandType = ALARM, alarmTime = myCalendar.timeInMillis.toString()))
-            binding.statusTv.text =SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(myCalendar.time)
+            binding.deviceCountText.text =SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(myCalendar.time)
         }
 
         adapter.alarmClick {
