@@ -3,8 +3,11 @@ package com.tutorials.deviceadminsample
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
@@ -24,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private val fireStoreRef = Firebase.firestore.collection(USERS)
     private var deviceToken: String? = null
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -44,6 +48,17 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             //some thing
         }
+
+        Log.d("RemoteLocker", "onCreate:BOARD: ${Build.BOARD}")
+        Log.d("RemoteLocker", "onCreate: BRAND: ${Build.BRAND}")
+        Log.d("RemoteLocker", "onCreate: DEVICE: ${Build.DEVICE}")
+        Log.d("RemoteLocker", "onCreate: ID: ${Build.ID}")
+        Log.d("RemoteLocker", "onCreate: MANUFACTURER: ${Build.MANUFACTURER}")
+        Log.d("RemoteLocker", "onCreate: MODEL: ${Build.MODEL}")
+        Log.d("RemoteLocker", "onCreate: PRODUCT: ${Build.PRODUCT}")
+
+        //brand + model
+
         val msg = "You need to allow permission for app to work properly"
         val title = "ACCEPT ADMIN REQUEST"
 

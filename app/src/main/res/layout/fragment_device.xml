@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".UserFragment">
+    tools:context=".DeviceFragment">
 
     <TextView
         android:id="@+id/hello_text"
@@ -172,7 +172,7 @@
         android:id="@+id/alarmBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="55dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="18dp"
         android:layout_marginEnd="15dp"
         android:text="Set Alarm"

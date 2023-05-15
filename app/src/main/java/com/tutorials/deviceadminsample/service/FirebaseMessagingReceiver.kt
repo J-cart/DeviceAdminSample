@@ -18,14 +18,19 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.tutorials.deviceadminsample.*
+import com.tutorials.deviceadminsample.model.DeviceInfo
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.util.*
 import com.tutorials.deviceadminsample.worker.AdminCommandWorker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 private val fStoreUsers = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
-private val fStoreAdmin = Firebase.firestore.collection(USERS).document(ADMIN).collection("ALL")
 
 class FirebaseMessagingReceiver : FirebaseMessagingService() {
 
@@ -41,7 +46,7 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
                 upcomingAlarmTime.value = message.data["alarmTime"]!!.toLong()
                 val alarmData =
                     Data.Builder().putString(COMMAND_TYPE, ALARM)
-                        .putLong(ALARM_TIME,message.data["alarmTime"]!!.toLong()).build()
+                        .putLong(ALARM_TIME, message.data["alarmTime"]!!.toLong()).build()
                 val workOne =
                     OneTimeWorkRequestBuilder<AdminCommandWorker>().setInputData(alarmData)
                         .build()
@@ -66,7 +71,7 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("CLOUD_MSG", "new token --->$token")
-
+        updateDeviceToken(this,token)
     }
 
 
@@ -104,17 +109,24 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
 
     companion object {
         var upcomingAlarmTime = MutableStateFlow(0L)
-        fun updateToken(context: Context, token: String) {
+
+        fun updateDeviceToken(context: Context, token: String,deviceInfo: DeviceInfo= DeviceInfo()) {
             Firebase.auth.currentUser?.let { currentUser ->
                 currentUser.email?.let { email ->
-                    fStoreUsers.document(email).get().addOnCompleteListener { taskBody ->
-                        when {
-                            taskBody.isSuccessful -> {
-                                taskBody.result.toObject<User>()?.let { userBody ->
+                    CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
+                        try {
+
+                            val getUser =
+                                fStoreUsers.document(email).collection(DEVICES).document(deviceInfo.deviceId)
+                                    .get()
+                                    .await()
+                            if (getUser.exists()) {
+                                getUser.toObject<DeviceInfo>()?.let { deviceInfo ->
                                     val tokenList = mutableListOf<String>()
-                                    tokenList.addAll(userBody.deviceToken)
+                                    tokenList.addAll(deviceInfo.deviceToken)
                                     tokenList.add(token)
-                                    fStoreUsers.document(email)
+                                    fStoreUsers.document(email).collection(DEVICES)
+                                        .document(deviceInfo.deviceId)
                                         .update("deviceToken", tokenList)
                                         .addOnCompleteListener {
                                             if (it.isSuccessful) {
@@ -127,50 +139,18 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
 
                                         }
                                 }
+                                return@launch
                             }
-                            else -> {
-                                context.showToast("Error:Token Not Updated:->${taskBody.exception}")
-                                Log.d("me_updateToken", " ${taskBody.exception}")
-                            }
+                           fStoreUsers.document(email).collection(DEVICES).document(deviceInfo.deviceId).set(deviceInfo).await()
+                            Log.d("me_updateToken", " Document Doesn't exist but updating new info...")
+                            context.showToast("Oops...Document Doesn't exist but updating new info...")
+                        }catch (e:Exception){
+                            Log.d("me_updateToken", "Exception:-> $e")
+                            context.showToast("Ooops...Token Not Updated:->$e")
+
                         }
                     }
                 }
-            }
-        }
-
-        fun updateTokenAdmin(context: Context, token: String) {
-            Firebase.auth.currentUser?.let { currentUser ->
-                currentUser.email?.let { email ->
-                    fStoreAdmin.document(email).get().addOnCompleteListener { taskBody ->
-                        when {
-                            taskBody.isSuccessful -> {
-                                taskBody.result.toObject<User>()?.let { userBody ->
-                                    val tokenList = mutableListOf<String>()
-                                    tokenList.addAll(userBody.deviceToken)
-                                    tokenList.add(token)
-                                    fStoreAdmin.document(email)
-                                        .update("deviceToken", tokenList)
-                                        .addOnCompleteListener {
-                                            if (it.isSuccessful) {
-                                                context.showToast("Token Updated Successfully")
-                                                Log.d("me_updateToken", " ${it.result}")
-                                            } else {
-                                                context.showToast("Error:Token Not Updated:->${it.exception}")
-                                                Log.d("me_updateToken", " ${it.exception}")
-                                            }
-
-                                        }
-                                }
-                            }
-                            else -> {
-                                context.showToast("Error:Token Not Updated:->${taskBody.exception}")
-                                Log.d("me_updateToken", " ${taskBody.exception}")
-                            }
-                        }
-                    }
-                }
-
-
             }
         }
 

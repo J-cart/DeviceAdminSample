@@ -32,7 +32,7 @@ class BoardingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val first = SharedPreference.getBoolean(FIRST_LAUNCH, true)
-        if (first) {
+        if (!first) {
             findNavController().navigate(R.id.loginFragment)
         }
 

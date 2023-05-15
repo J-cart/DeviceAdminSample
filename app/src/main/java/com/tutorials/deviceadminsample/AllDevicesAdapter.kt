@@ -9,20 +9,24 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.tutorials.deviceadminsample.databinding.DeviceViewholderBinding
 import com.tutorials.deviceadminsample.databinding.UserViewholderBinding
+import com.tutorials.deviceadminsample.model.DeviceInfo
 import com.tutorials.deviceadminsample.model.User
+import com.tutorials.deviceadminsample.util.ACTIVE
+import com.tutorials.deviceadminsample.util.INACTIVE
 import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AllUsersAdapter : ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBack) {
+class AllDevicesAdapter : ListAdapter<DeviceInfo, AllDevicesAdapter.ViewHolder>(DiffCallBack) {
 
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = DeviceViewholderBinding.bind(view)
-        fun bind(data: User) {
+        fun bind(data: DeviceInfo) {
             binding.apply {
-                nameText.text = data.email
-                statusText.text = data.password
+                nameText.text = data.deviceName
+
+                statusText.text = if (data.deviceToken.last() =="0") INACTIVE else ACTIVE
                 root.setOnClickListener {
                     listener?.let { it(data) }
                 }
@@ -31,42 +35,30 @@ class AllUsersAdapter : ListAdapter<User, AllUsersAdapter.ViewHolder>(DiffCallBa
     }
 
 
-    companion object DiffCallBack : DiffUtil.ItemCallback<User>() {
-        override fun areItemsTheSame(oldItem: User, newItem: User) =
-            oldItem.uid == newItem.uid
+    companion object DiffCallBack : DiffUtil.ItemCallback<DeviceInfo>() {
+        override fun areItemsTheSame(oldItem: DeviceInfo, newItem: DeviceInfo) =
+            oldItem.deviceId == newItem.deviceId
 
-        override fun areContentsTheSame(oldItem: User, newItem: User) =
-            oldItem.email == newItem.email && oldItem.uid == newItem.uid
+        override fun areContentsTheSame(oldItem: DeviceInfo, newItem: DeviceInfo) =
+            oldItem.deviceId == newItem.deviceId && oldItem.deviceName == newItem.deviceName
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllUsersAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllDevicesAdapter.ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.device_viewholder, parent, false)
         return ViewHolder(view)
     }
 
 
-    override fun onBindViewHolder(holder: AllUsersAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: AllDevicesAdapter.ViewHolder, position: Int) {
         val pos = getItem(position)
         holder.bind(pos)
 
     }
 
-    private var lockListener: ((User) -> Unit)? = null
+    private var listener: ((DeviceInfo) -> Unit)? = null
 
-    fun lockClick(listener: (User) -> Unit) {
-        this.lockListener = listener
-    }
-
-    private var alarmListener: ((User) -> Unit)? = null
-
-    fun alarmClick(listener: (User) -> Unit) {
-        this.alarmListener = listener
-    }
-
-    private var listener: ((User) -> Unit)? = null
-
-    fun adapterClick(listener: (User) -> Unit) {
+    fun adapterClick(listener: (DeviceInfo) -> Unit) {
         this.listener = listener
     }
 

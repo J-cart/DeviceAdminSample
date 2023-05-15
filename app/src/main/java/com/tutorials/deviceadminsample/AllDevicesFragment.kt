@@ -1,9 +1,11 @@
 package com.tutorials.deviceadminsample
 
 import android.app.TimePickerDialog
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,24 +16,24 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.arch.LockViewModel
-import com.tutorials.deviceadminsample.databinding.FragmentAllUsersBinding
+import com.tutorials.deviceadminsample.databinding.FragmentAllDevicesBinding
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
-import com.tutorials.deviceadminsample.util.ALARM
-import com.tutorials.deviceadminsample.util.LOCK
 import com.tutorials.deviceadminsample.util.TIME_FORMAT_ONE
 import com.tutorials.deviceadminsample.util.getData
+import com.tutorials.deviceadminsample.util.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AllUsersFragment : Fragment(){
-    private var _binding: FragmentAllUsersBinding? = null
+class AllDevicesFragment : Fragment(){
+    private var _binding: FragmentAllDevicesBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LockViewModel by activityViewModels()
     private val adapter by lazy { AllUsersAdapter() }
+    private val deviceAdapter by lazy { AllDevicesAdapter() }
     private lateinit var user: User
     private val fUser = Firebase.auth.currentUser
 
@@ -41,18 +43,19 @@ class AllUsersFragment : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentAllUsersBinding.inflate(inflater, container, false)
+        _binding = FragmentAllDevicesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.profileImg.clipToOutline = true
-        viewModel.addAllUserSnapshot()
+
         fUser?.email?.let {
-            (activity as MainActivity).supportActionBar?.title = it
-        }?: "Admin Account"
-       /* lifecycleScope.launch { observeAllUsers() }
+            viewModel.addAllDevicesSnapshot(it)
+            viewModel.getCurrentUserInfo(it, Build.ID)
+        }?:Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+       /* lifecycleScope.launch { observeAllDevices() }
         newMenu()*/
         lifecycleScope.launch {
             adapter.submitList(emptyList())
@@ -62,8 +65,33 @@ class AllUsersFragment : Fragment(){
             adapter.submitList(getData())
         }
         binding.recyclerView.adapter = adapter
+        lifecycleScope.launch {
+            viewModel.currentUserDevice.collect{state->
+                when(state){
+                    is Resource.Successful->{
+                        binding.helloText.setOnClickListener {
+                            state.data?.let {
+                                FirebaseMessagingReceiver.updateDeviceToken(requireContext(), "0",it)
+                                Firebase.auth.signOut().also {
+                                    val navigate = AllDevicesFragmentDirections.actionAllUsersToLoginFragment()
+                                    findNavController().navigate(navigate)
+                                    viewModel.resetOnSignOut()
+                                }
+                            }?:requireContext().showToast("User Device Info Not Available")
+
+                        }
+
+                    }
+                   is Resource.Failure->{
+                       state.msg?.let { requireContext().showToast(it) }
+                   }
+                    else->Unit
+                }
+
+            }
+        }
         adapter.adapterClick {
-            val action = AllUsersFragmentDirections.actionAllUsersToUserFragment()
+            val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment()
             findNavController().navigate(action)
         }
 
@@ -71,10 +99,10 @@ class AllUsersFragment : Fragment(){
 
     }
 
-    private suspend fun observeAllUsers() {
+    private suspend fun observeAllDevices(email:String) {
 
-        viewModel.getAllUsers()
-        viewModel.allUsers.collect { resource ->
+        viewModel.getAllUserDevice(email)
+        viewModel.allDevices.collect { resource ->
             when (resource) {
                 is Resource.Loading -> {
                     //show Loading
@@ -87,7 +115,7 @@ class AllUsersFragment : Fragment(){
                     binding.recyclerView.adapter = adapter
                     resource.data?.let {
                         if (it.isNotEmpty()){
-                            adapter.submitList(it)
+                            deviceAdapter.submitList(it)
                             errorState(false)
                             binding.deviceCountText.text = "Total Devices - ${it.size}"
                         }else{
@@ -96,10 +124,10 @@ class AllUsersFragment : Fragment(){
                             adapter.submitList(emptyList())
                         }
                     } ?: emptyList<User>()
-                    adapter.lockClick {
-                        val user = it.copy(commandType = LOCK)
-                        viewModel.sendPushNotifier(user)
-                    }
+//                    adapter.lockClick {
+//                        val user = it.copy(commandType = LOCK)
+//                        viewModel.sendPushNotifier(user)
+//                    }
                     tryDate()
                 }
                 is Resource.Failure -> {
@@ -134,7 +162,7 @@ class AllUsersFragment : Fragment(){
 
             Log.d("TIMER2","${myCalendar.time}")
             Log.d("TIMER3","${myCalendar.timeInMillis}")
-            viewModel.sendPushNotifier(user.copy(commandType = ALARM, alarmTime = myCalendar.timeInMillis.toString()))
+            //viewModel.sendPushNotifier(user.copy(commandType = ALARM, alarmTime = myCalendar.timeInMillis.toString()))
             binding.deviceCountText.text =SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(myCalendar.time)
         }
 
@@ -160,10 +188,10 @@ class AllUsersFragment : Fragment(){
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.logoutMenu -> {
-                        FirebaseMessagingReceiver.updateToken(requireContext(), "0")
+                        FirebaseMessagingReceiver.updateDeviceToken(requireContext(), "0")
                         Firebase.auth.signOut().also {
                             findNavController().navigate(R.id.loginFragment)
-                            viewModel.updateLogin()
+                            viewModel.resetOnSignOut()
                         }
                         true
                     }

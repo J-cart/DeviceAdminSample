@@ -1,5 +1,6 @@
 package com.tutorials.deviceadminsample
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -35,20 +36,17 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*if (fUser != null) {
-            if (!fUser.email!!.contains("admin",true)){
-                val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
-                findNavController().navigate(navigate)
-                return
-            }
-            findNavController().navigate(R.id.adminLoginFragment)
-        }*/
+        if (fUser != null) {
+            val navigate = LoginFragmentDirections.actionLoginFragmentToAllUsers()
+            findNavController().navigate(navigate)
+            return
+        }
         validateUser()
 
     }
 
     private fun validateUser() {
-
+        val deviceName = Build.BRAND + " " + Build.MODEL
         binding.loginLayout.apply {
             createAccText.setOnClickListener {
                 emailEdt.setText("")
@@ -58,19 +56,21 @@ class LoginFragment : Fragment() {
             }
 
             loginBtn.setOnClickListener {
-                val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
-                findNavController().navigate(navigate)
-/*
+
                 lifecycleScope.launch {
-                    if(emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()){
+                    if (emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()) {
                         emailBox.error = "Required,Empty Field*"
                         return@launch
                     }
-                    if (emailEdt.text!!.contains("admin",true)) {
-                        emailBox.error = "Required, Invalid (ADMIN) login*"
-                        return@launch
-                    }
-                    viewModel.loginUser(requireContext(),emailEdt.text.toString(), passEdt.text.toString())
+
+                    viewModel.loginUser(
+                       context =  requireContext(),
+                        email = emailEdt.text.toString(),
+                        password = passEdt.text.toString(),
+                        deviceId = Build.ID,
+                        deviceName = deviceName,
+                        location = ""
+                    )
                     viewModel.loginState.collect {
                         when (it) {
                             is RequestState.Loading -> {
@@ -83,7 +83,8 @@ class LoginFragment : Fragment() {
                                     "Login Successful--> ${it.data}",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                findNavController().navigate(R.id.userFragment)
+                                val action = LoginFragmentDirections.actionLoginFragmentToAllUsers()
+                                findNavController().navigate(action)
                             }
                             is RequestState.Failure -> {
                                 progressBar.isVisible = false
@@ -93,14 +94,13 @@ class LoginFragment : Fragment() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                            is RequestState.NonExistent->{
+                            is RequestState.NonExistent -> {
                                 progressBar.isVisible = false
                             }
                         }
                     }
 
                 }
-*/
 
 
             }
@@ -119,23 +119,23 @@ class LoginFragment : Fragment() {
             }
 
             createAccBtn.setOnClickListener {
-                val navigate = LoginFragmentDirections.actionLoginFragmentToUserFragment()
-                findNavController().navigate(navigate)
-/*
                 lifecycleScope.launch {
-                    if(emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()){
+                    if (emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()) {
                         emailBox.error = "Required,Empty Field*"
                         return@launch
                     }
 
-                    if (emailEdt.text!!.contains("admin",true)) {
-                        emailBox.error = "Required, field cannot contain an ADMIN login*"
-                        return@launch
-                    }
-                    viewModel.signUpNew(emailEdt.text.toString(), passEdt.text.toString())
+
+                    viewModel.signUpNew(
+                        email = emailEdt.text.toString(),
+                        password = passEdt.text.toString(),
+                        deviceId = Build.ID,
+                        deviceName = deviceName,
+                        location = ""
+                    )
                     viewModel.signUpState.collect {
                         when (it) {
-                            is RequestState.NonExistent->{
+                            is RequestState.NonExistent -> {
                                 progressBar.isVisible = false
                             }
                             is RequestState.Loading -> {
@@ -149,7 +149,10 @@ class LoginFragment : Fragment() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                findNavController().navigate(R.id.userFragment)
+                                val route = LoginFragmentDirections.actionLoginFragmentToAllUsers()
+                                findNavController().navigate(route)
+
+                                //findNavController().navigate(R.id.userFragment)
                             }
                             is RequestState.Failure -> {
                                 progressBar.isVisible = false
@@ -163,7 +166,6 @@ class LoginFragment : Fragment() {
                         }
                     }
                 }
-*/
             }
         }
     }

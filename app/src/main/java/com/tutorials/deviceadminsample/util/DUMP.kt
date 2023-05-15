@@ -9,7 +9,9 @@ import android.os.PowerManager
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.tutorials.deviceadminsample.model.User
@@ -30,76 +32,76 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-
-/* private val fStoreUsers1 = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
-        .document("email").collection("devices").document("")*/
+/*
+ private val fStoreUsers1 = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
+        .document("email").collection("devices").document("--").collection("command").document("all--")*/
 fun getData(): ArrayList<User> {
     val items = ArrayList<User>()
     return items.apply {
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
         add(
             User(
-                deviceName = "Some random device",
-                status = "Not active"
+                email = "Some random device",
+                password = "Not active"
             )
         )
     }

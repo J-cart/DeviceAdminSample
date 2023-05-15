@@ -7,12 +7,16 @@
 
     <fragment
         android:id="@+id/allUsers"
-        android:name="com.tutorials.deviceadminsample.AllUsersFragment"
+        android:name="com.tutorials.deviceadminsample.AllDevicesFragment"
         android:label="Admin Account"
-        tools:layout="@layout/fragment_all_users" >
+        tools:layout="@layout/fragment_all_devices" >
         <action
             android:id="@+id/action_allUsers_to_userFragment"
             app:destination="@id/userFragment" />
+        <action
+            android:id="@+id/action_allUsers_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -26,12 +30,15 @@
         <action
             android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
             app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_allUsers"
+            app:destination="@id/allUsers" />
     </fragment>
     <fragment
         android:id="@+id/userFragment"
-        android:name="com.tutorials.deviceadminsample.UserFragment"
+        android:name="com.tutorials.deviceadminsample.DeviceFragment"
         android:label="User Account"
-        tools:layout="@layout/fragment_user" />
+        tools:layout="@layout/fragment_device" />
     <fragment
         android:id="@+id/boardingFragment"
         android:name="com.tutorials.deviceadminsample.onboarding.BoardingFragment"
