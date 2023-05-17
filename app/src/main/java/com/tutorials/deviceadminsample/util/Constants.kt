@@ -1,16 +1,14 @@
 package com.tutorials.deviceadminsample.util
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.flow.map
 
 
 const val VERBOSE_NOTIFICATION_CHANNEL_NAME = "Verbose FCM Notifications"
@@ -38,6 +36,36 @@ fun Context.showAlert(title:String,msg:String,action:()->Unit){
         create()
         show()
     }
+}
+fun Context.showStrictAlert(title:String,msg:String,action:()->Unit){
+    MaterialAlertDialogBuilder(this).apply {
+        setMessage(msg)
+        setTitle(title)
+        setCancelable(false)
+        setPositiveButton("OK") { dialogInterface, int ->
+            action()
+            setCancelable(true)
+            dialogInterface.dismiss()
+        }
+        create()
+        show()
+    }
+}
+
+fun Context.checkPermissions(): Boolean {
+    return ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+}
+fun requestPermissions(permissionsRequestLauncher: ActivityResultLauncher<Array<String>>) {
+    permissionsRequestLauncher.launch(
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        )
+    )
 }
 
 class SharedPreference {

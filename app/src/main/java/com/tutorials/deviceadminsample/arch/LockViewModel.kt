@@ -259,4 +259,21 @@ class LockViewModel : ViewModel() {
             }
         }
     }
+
+    fun updateUserLocation(email: String,location: String){
+       viewModelScope.launch {
+           if (_currentUserDevice.value is Resource.Successful){
+               try {
+                   _currentUserDevice.value.data?.let {
+                       fStoreUsers.document(email).collection(DEVICES).document(it.deviceId)
+                           .update("location", location).await()
+                   }
+               }catch (e:Exception){
+                   Log.d("me_updateLocation", "updateUserLocation: some error occurred $e")
+               }
+               return@launch
+           }
+           Log.d("me_updateLocation", "updateUserLocation: some error occurred -- no current user data")
+       }
+    }
 }
