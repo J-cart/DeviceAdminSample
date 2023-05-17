@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -46,6 +47,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun validateUser() {
+        val navigate = LoginFragmentDirections.actionLoginFragmentToAllUsers()
         val deviceName = Build.BRAND + " " + Build.MODEL
         binding.loginLayout.apply {
             createAccText.setOnClickListener {
@@ -64,7 +66,7 @@ class LoginFragment : Fragment() {
                     }
 
                     viewModel.loginUser(
-                       context =  requireContext(),
+                        context = requireContext(),
                         email = emailEdt.text.toString(),
                         password = passEdt.text.toString(),
                         deviceId = Build.ID,
@@ -83,8 +85,10 @@ class LoginFragment : Fragment() {
                                     "Login Successful--> ${it.data}",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                val action = LoginFragmentDirections.actionLoginFragmentToAllUsers()
-                                findNavController().navigate(action)
+
+                                if (findNavController().currentDestination?.id == R.id.loginFragment) {
+                                    findNavController().navigate(navigate)
+                                }
                             }
                             is RequestState.Failure -> {
                                 progressBar.isVisible = false
@@ -120,18 +124,29 @@ class LoginFragment : Fragment() {
 
             createAccBtn.setOnClickListener {
                 lifecycleScope.launch {
-                    if (emailEdt.text.isNullOrEmpty() || passEdt.text.isNullOrEmpty()) {
+                    if (emailEdt.text.isNullOrEmpty()) {
                         emailBox.error = "Required,Empty Field*"
+                        return@launch
+                    }
+
+                    if (passEdt.text.isNullOrEmpty()) {
+                        passBox.error = "Required,Empty Field*"
+                        return@launch
+                    }
+
+                    if (fullNameEdt.text.isNullOrEmpty()) {
+                        fullNameBox.error = "Required,Empty Field*"
                         return@launch
                     }
 
 
                     viewModel.signUpNew(
-                        email = emailEdt.text.toString(),
-                        password = passEdt.text.toString(),
+                        email = emailEdt.text?.trim().toString(),
+                        password = passEdt.text?.trim().toString(),
                         deviceId = Build.ID,
                         deviceName = deviceName,
-                        location = ""
+                        location = "",
+                        userName = fullNameEdt.text?.trim().toString()
                     )
                     viewModel.signUpState.collect {
                         when (it) {
@@ -149,9 +164,10 @@ class LoginFragment : Fragment() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                val route = LoginFragmentDirections.actionLoginFragmentToAllUsers()
-                                findNavController().navigate(route)
 
+                                if (findNavController().currentDestination?.id == R.id.loginFragment) {
+                                    findNavController().navigate(navigate)
+                                }
                                 //findNavController().navigate(R.id.userFragment)
                             }
                             is RequestState.Failure -> {

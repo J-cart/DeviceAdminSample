@@ -2,7 +2,6 @@ package com.tutorials.deviceadminsample
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.TimePickerDialog
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
@@ -28,14 +27,10 @@ import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentAllDevicesBinding
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
-import com.tutorials.deviceadminsample.onboarding.BoardingFragmentDirections
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
 import com.tutorials.deviceadminsample.util.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.util.*
 
 @SuppressLint("MissingPermission")
@@ -43,9 +38,7 @@ class AllDevicesFragment : Fragment() {
     private var _binding: FragmentAllDevicesBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LockViewModel by activityViewModels()
-    private val adapter by lazy { AllUsersAdapter() }
     private val deviceAdapter by lazy { AllDevicesAdapter() }
-    private lateinit var user: User
     private val fUser = Firebase.auth.currentUser
     private var cityName = "Not Innit."
 
@@ -53,9 +46,9 @@ class AllDevicesFragment : Fragment() {
 
 
     private val locationRequest =
-        LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, 1000L).apply {
+        LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, 120000L).apply {
             setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-            setMinUpdateIntervalMillis(120000L)//5mins-300000L
+            setMinUpdateIntervalMillis(10000L)//5mins-300000L
 
         }.build()
 
@@ -96,21 +89,29 @@ class AllDevicesFragment : Fragment() {
         binding.profileImg.clipToOutline = true
 
         fUser?.email?.let {
+            viewModel.getCurrentUserInfo(it)
+            viewModel.getAllUserDevice(it)
             viewModel.addAllDevicesSnapshot(it)
-            viewModel.getCurrentUserInfo(it, Build.ID)
+            viewModel.addDeviceUserInfoSnapshot(it)
+            viewModel.getCurrentUserDeviceInfo(it, Build.ID)
         } ?: Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
-        /* lifecycleScope.launch { observeAllDevices() }
-         newMenu()*/
-        lifecycleScope.launch {
-            adapter.submitList(emptyList())
-            loadingState(true)
-            delay(1000L)
-            loadingState(false)
-            adapter.submitList(getData())
+
+        observeAllDevices()
+        binding.recyclerView.adapter = deviceAdapter
+        observeDeviceCurrentUserInfo()
+        observeDeviceCurrentUserDeviceInfo()
+
+        deviceAdapter.adapterClick {
+            val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment(it.deviceId)
+            findNavController().navigate(action)
         }
-        binding.recyclerView.adapter = adapter
+
+
+    }
+
+    private fun observeDeviceCurrentUserDeviceInfo() {
         lifecycleScope.launch {
-            viewModel.currentUserDevice.collect { state ->
+            viewModel.currentUserDeviceInfo.collect { state ->
                 when (state) {
                     is Resource.Successful -> {
                         binding.helloText.setOnClickListener {
@@ -139,95 +140,89 @@ class AllDevicesFragment : Fragment() {
 
             }
         }
-        adapter.adapterClick {
-            val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment()
-            findNavController().navigate(action)
-        }
-
 
     }
 
-    private suspend fun observeAllDevices(email: String) {
+    private fun observeDeviceCurrentUserInfo() {
+        lifecycleScope.launch {
+            viewModel.currentUserInfo.collect { state ->
+                when (state) {
+                    is Resource.Successful -> {
+                        state.data?.let {
+                            if (it.userName.isNotEmpty()){
+                                binding.helloText.text = "Hello ${it.userName}"
+                                binding.infoText.text = "Welcome back ${it.userName}"
+                            }
 
-        viewModel.getAllUserDevice(email)
-        viewModel.allDevices.collect { resource ->
-            when (resource) {
-                is Resource.Loading -> {
-                    //show Loading
-                    errorState(false)
-                    loadingState(true)
+                        } ?: requireContext().showToast("User Device Info Not Available")
+                    }
+                    is Resource.Failure -> {
+                        state.msg?.let { requireContext().showToast(it) }
+                    }
+                    else -> Unit
                 }
-                is Resource.Successful -> {
-                    //display result
-                    loadingState(false)
-                    binding.recyclerView.adapter = adapter
-                    resource.data?.let {
-                        if (it.isNotEmpty()) {
-                            deviceAdapter.submitList(it)
-                            errorState(false)
-                            binding.deviceCountText.text = "Total Devices - ${it.size}"
-                        } else {
-                            errorState(true)
-                            binding.deviceCountText.text = "Total Devices - 0"
-                            adapter.submitList(emptyList())
+
+            }
+        }
+
+    }
+
+    private fun observeAllDevices() {
+        lifecycleScope.launch {
+            viewModel.allDevices.collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        //show Loading
+                        binding.apply {
+                            errorText.isVisible = false
+                            progressBar.isVisible = true
+                            recyclerView.isVisible = false
+                            deviceCountText.text = "Total Devices - 0"
                         }
-                    } ?: emptyList<User>()
-//                    adapter.lockClick {
-//                        val user = it.copy(commandType = LOCK)
-//                        viewModel.sendPushNotifier(user)
-//                    }
-                    tryDate()
-                }
-                is Resource.Failure -> {
-                    //show error
-                    loadingState(false)
-                    errorState(true)
-                    resource.msg?.let {
-                        binding.errorText.text = it
-                        adapter.submitList(emptyList())
-                        binding.deviceCountText.text = "Total Devices - 0"
+                    }
+                    is Resource.Successful -> {
+                        //display result
+                        resource.data?.let {
+                            if (it.isNotEmpty()) {
+                                binding.apply {
+                                    errorText.isVisible = false
+                                    progressBar.isVisible = false
+                                    recyclerView.isVisible = true
+
+                                    deviceAdapter.submitList(it)
+                                    deviceCountText.text = "Total Devices - ${it.size}"
+                                }
+                            } else {
+                                binding.apply {
+                                    errorText.isVisible = true
+                                    progressBar.isVisible = false
+                                    recyclerView.isVisible = false
+
+                                    deviceCountText.text = "Total Devices - 0"
+                                    errorText.text = "No Devices Available..."
+                                    deviceAdapter.submitList(emptyList())
+                                }
+                            }
+                        } ?: emptyList<User>()
+
+                    }
+                    is Resource.Failure -> {
+                        //show error
+                        resource.msg?.let {
+                            binding.apply {
+                                errorText.isVisible = true
+                                errorText.text = it
+                                progressBar.isVisible = false
+                                recyclerView.isVisible = false
+                                deviceCountText.text = "Total Devices - 0"
+                            }
+                        }
                     }
                 }
+
             }
-
         }
     }
-
-    private fun errorState(state: Boolean) {
-        binding.errorText.isVisible = state
-    }
-
-    private fun loadingState(state: Boolean) {
-        binding.progressBar.isVisible = state
-    }
-
-    private fun tryDate() {
-
-        val myCalendar = Calendar.getInstance()
-
-        val timePickerOnDataSetListener = TimePickerDialog.OnTimeSetListener { _, hour, minute ->
-            myCalendar.set(Calendar.HOUR_OF_DAY, hour)
-            myCalendar.set(Calendar.MINUTE, minute)
-
-            Log.d("TIMER2", "${myCalendar.time}")
-            Log.d("TIMER3", "${myCalendar.timeInMillis}")
-            //viewModel.sendPushNotifier(user.copy(commandType = ALARM, alarmTime = myCalendar.timeInMillis.toString()))
-            binding.deviceCountText.text =
-                SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(myCalendar.time)
-        }
-
-        adapter.alarmClick {
-            user = it
-            TimePickerDialog(
-                context,
-                timePickerOnDataSetListener,
-                myCalendar.get(Calendar.HOUR_OF_DAY),
-                myCalendar.get(Calendar.MINUTE),
-                false
-            ).show()
-        }
-    }
-
 
     private fun newMenu() {
         requireActivity().addMenuProvider(object : MenuProvider {
@@ -279,7 +274,7 @@ class AllDevicesFragment : Fragment() {
                 Log.d("City Name Exception", "getCityName: ${e.message}")
             }
         }
-        Log.d("City Name Exception", "getCityName: $cityName")
+        Log.d("City Name", "getCityName: $cityName")
     }
 
     private val permissionsRequestLauncher: ActivityResultLauncher<Array<String>> =

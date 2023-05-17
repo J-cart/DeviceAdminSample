@@ -32,10 +32,15 @@ class LockViewModel : ViewModel() {
     private val _allDevices = MutableStateFlow<Resource<List<DeviceInfo>>>(Resource.Loading())
     val allDevices = _allDevices.asStateFlow()
 
-    private val _currentSelectedDevice = MutableStateFlow<Resource<DeviceInfo>>(Resource.Loading())
-    val currentSelectedDevice = _currentSelectedDevice.asStateFlow()
-    private val _currentUserDevice = MutableStateFlow<Resource<DeviceInfo>>(Resource.Loading())
-    val currentUserDevice = _currentUserDevice.asStateFlow()
+    private val _currentSelectedDeviceInfo =
+        MutableStateFlow<Resource<DeviceInfo>>(Resource.Loading())
+    val currentSelectedDeviceInfo = _currentSelectedDeviceInfo.asStateFlow()
+
+    private val _currentUserDeviceInfo = MutableStateFlow<Resource<DeviceInfo>>(Resource.Loading())
+    val currentUserDeviceInfo = _currentUserDeviceInfo.asStateFlow()
+
+    private val _currentUserInfo = MutableStateFlow<Resource<User>>(Resource.Loading())
+    val currentUserInfo = _currentUserInfo.asStateFlow()
 
     sealed class UserEvents {
         object Successful : UserEvents()
@@ -46,6 +51,7 @@ class LockViewModel : ViewModel() {
     fun signUpNew(
         email: String,
         password: String,
+        userName: String,
         deviceId: String,
         deviceName: String,
         location: String
@@ -57,8 +63,8 @@ class LockViewModel : ViewModel() {
                 val tokenList = listOf(tokenReg)
                 val signUp = fAuth.createUserWithEmailAndPassword(email, password).await()
                 val newUser = signUp.user?.uid?.let {
-                    User(email = email, uid = it, password = password)
-                } ?: User(email = email, password = password)
+                    User(email = email, uid = it, password = password, userName = userName)
+                } ?: User(email = email, password = password, userName = userName)
                 val device = DeviceInfo(
                     deviceId = deviceId,
                     deviceName = deviceName,
@@ -214,18 +220,34 @@ class LockViewModel : ViewModel() {
             .addSnapshotListener { value, error ->
                 if (error != null) {
                     Log.d("me_DevicesSnapshot", "Error---->> $error")
+                    _currentSelectedDeviceInfo.value = Resource.Failure(error.message)
                     return@addSnapshotListener
                 }
                 Log.d("me_DevicesSnapshot", "listener success---->> $error")
-               value?.toObject<DeviceInfo>()?.let{
-                   _currentSelectedDevice.value = Resource.Successful(it)
-               }?:return@addSnapshotListener
+                value?.toObject<DeviceInfo>()?.let {
+                    _currentSelectedDeviceInfo.value = Resource.Successful(it)
+                } ?: return@addSnapshotListener
+            }
+    }
+
+    fun addDeviceUserInfoSnapshot(email: String) {
+        fStoreUsers.document(email)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.d("me_DevicesUserInfoSnapshot", "Error---->> $error")
+                    _currentSelectedDeviceInfo.value = Resource.Failure(error.message)
+                    return@addSnapshotListener
+                }
+                Log.d("me_DevicesUserInfoSnapshot", "listener success---->> $error")
+                value?.toObject<User>()?.let {
+                    _currentUserInfo.value = Resource.Successful(it)
+                } ?: return@addSnapshotListener
             }
     }
 
     fun resetOnSignOut() {
         _loginState.value = RequestState.NonExistent
-        _currentUserDevice.value = Resource.Loading()
+        _currentUserDeviceInfo.value = Resource.Loading()
     }
 
     private fun updateUserAlarmTime(email: String, time: String) {
@@ -249,31 +271,49 @@ class LockViewModel : ViewModel() {
         }
     }
 
-    fun getCurrentUserInfo(email: String,deviceId: String){
+    fun getCurrentUserDeviceInfo(email: String, deviceId: String) {
         viewModelScope.launch {
             try {
-                val userDevice = fStoreUsers.document(email).collection(DEVICES).document(deviceId).get().await()
-                _currentUserDevice.value = Resource.Successful(userDevice.toObject<DeviceInfo>())
-            }catch (e:Exception){
-                _currentUserDevice.value = Resource.Failure(e.message)
+                val userDevice =
+                    fStoreUsers.document(email).collection(DEVICES).document(deviceId).get().await()
+                _currentUserDeviceInfo.value =
+                    Resource.Successful(userDevice.toObject<DeviceInfo>())
+            } catch (e: Exception) {
+                _currentUserDeviceInfo.value = Resource.Failure(e.message)
             }
         }
     }
 
-    fun updateUserLocation(email: String,location: String){
-       viewModelScope.launch {
-           if (_currentUserDevice.value is Resource.Successful){
-               try {
-                   _currentUserDevice.value.data?.let {
-                       fStoreUsers.document(email).collection(DEVICES).document(it.deviceId)
-                           .update("location", location).await()
-                   }
-               }catch (e:Exception){
-                   Log.d("me_updateLocation", "updateUserLocation: some error occurred $e")
-               }
-               return@launch
-           }
-           Log.d("me_updateLocation", "updateUserLocation: some error occurred -- no current user data")
-       }
+    fun getCurrentUserInfo(email: String) {
+        viewModelScope.launch {
+            try {
+                val userInfo =
+                    fStoreUsers.document(email).get().await()
+                _currentUserInfo.value =
+                    Resource.Successful(userInfo.toObject<User>())
+            } catch (e: Exception) {
+                _currentUserInfo.value = Resource.Failure(e.message)
+            }
+        }
+    }
+
+    fun updateUserLocation(email: String, location: String) {
+        viewModelScope.launch {
+            if (_currentUserDeviceInfo.value is Resource.Successful) {
+                try {
+                    _currentUserDeviceInfo.value.data?.let {
+                        fStoreUsers.document(email).collection(DEVICES).document(it.deviceId)
+                            .update("location", location).await()
+                    }
+                } catch (e: Exception) {
+                    Log.d("me_updateLocation", "updateUserLocation: some error occurred $e")
+                }
+                return@launch
+            }
+            Log.d(
+                "me_updateLocation",
+                "updateUserLocation: some error occurred -- no current user data"
+            )
+        }
     }
 }

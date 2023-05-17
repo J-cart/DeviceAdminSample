@@ -38,7 +38,11 @@
         android:id="@+id/userFragment"
         android:name="com.tutorials.deviceadminsample.DeviceFragment"
         android:label="User Account"
-        tools:layout="@layout/fragment_device" />
+        tools:layout="@layout/fragment_device" >
+        <argument
+            android:name="deviceId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/boardingFragment"
         android:name="com.tutorials.deviceadminsample.onboarding.BoardingFragment"
