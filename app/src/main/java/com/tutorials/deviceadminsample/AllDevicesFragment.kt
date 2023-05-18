@@ -92,17 +92,19 @@ class AllDevicesFragment : Fragment() {
             viewModel.addAllDevicesSnapshot(it)
             viewModel.addDeviceUserInfoSnapshot(it)
             viewModel.getCurrentUserDeviceInfo(it, Build.ID)
-        } ?: Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
 
-        observeAllDevices()
-        binding.recyclerView.adapter = deviceAdapter
-        observeDeviceCurrentUserInfo()
-        observeDeviceCurrentUserDeviceInfo()
+            observeAllDevices()
+            binding.recyclerView.adapter = deviceAdapter
+            observeDeviceCurrentUserInfo()
+            observeDeviceCurrentUserDeviceInfo()
 
-        deviceAdapter.adapterClick {
-            val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment(it.deviceId)
-            findNavController().navigate(action)
-        }
+            deviceAdapter.adapterClick {
+                val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment(it.deviceId)
+                findNavController().navigate(action)
+            }
+        } ?: noUserAvailable()
+
+
 
 
     }
@@ -304,6 +306,16 @@ class AllDevicesFragment : Fragment() {
     }
 
 
+   private fun noUserAvailable(){
+        Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+        binding.apply {
+            errorText.isVisible = true
+            errorText.text = "No user Logged In..."
+            recyclerView.isVisible = false
+            progressBar.isVisible = false
+
+        }
+    }
     override fun onStop() {
         super.onStop()
         fusedLocationProviderClient.removeLocationUpdates(locationCallBack)

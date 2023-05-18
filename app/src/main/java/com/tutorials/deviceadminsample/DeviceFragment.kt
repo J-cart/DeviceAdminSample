@@ -55,22 +55,22 @@ class DeviceFragment : Fragment() {
         binding.profileImg.clipToOutline = true
         val deviceId = args.deviceId
         fUser?.email?.let {
-            // TODO: get this to fetch the selected user data
             viewModel.addDeviceSnapshot(it, deviceId)
             viewModel.addDeviceUserInfoSnapshot(it)
+
+            observeDeviceCurrentUserInfo()
+            observeCurrentSelectedDevice()
+            binding.apply {
+                alarmBtn.setOnClickListener {
+                    //showConfirmationDialog()
+                    tryDate()
+                }
+                lockText.setOnClickListener {
+                    showActionDialog(LOCK)
+                }
+            }
         } ?: Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
 
-        observeDeviceCurrentUserInfo()
-        observeCurrentSelectedDevice()
-        binding.apply {
-            alarmBtn.setOnClickListener {
-                //showConfirmationDialog()
-                tryDate()
-            }
-            lockText.setOnClickListener {
-                showActionDialog(LOCK)
-            }
-        }
     }
 
     private fun tryDate() {
