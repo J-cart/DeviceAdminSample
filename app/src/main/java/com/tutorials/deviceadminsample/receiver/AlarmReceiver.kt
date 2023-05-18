@@ -10,9 +10,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.CountDownTimer
 import android.os.Vibrator
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.tutorials.deviceadminsample.*
 import com.tutorials.deviceadminsample.util.CHANNEL_ID
 import com.tutorials.deviceadminsample.util.NOTIFICATION_TITLE
@@ -24,29 +26,23 @@ class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         // This method is called when the BroadcastReceiver is receiving an Intent broadcast.
-        makeStatusNotification("Alarm Activated",context)
-        // we will use vibrator first
+        makeStatusNotification(context)
         // we will use vibrator first
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.vibrate(4000)
 
         Toast.makeText(context, "Alarm! Wake up! Wake up!", Toast.LENGTH_LONG).show()
-        var alarmUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        if (alarmUri == null) {
-            alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        }
+
+        val newUri = Uri.parse("android.resource://${context.packageName}/raw/siren_alarm")
 
         // setting default ringtone
-
-        // setting default ringtone
-        val ringtone = RingtoneManager.getRingtone(context, alarmUri)
+        val ringtone = RingtoneManager.getRingtone(context, newUri)
 
         // play ringtone
 
-        // play ringtone
-
-         val alarmTimer = object : CountDownTimer(10000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {}
+         val alarmTimer = object : CountDownTimer(20000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+            }
             override fun onFinish() {
                 ringtone.stop()
             }
@@ -55,7 +51,7 @@ class AlarmReceiver : BroadcastReceiver() {
         ringtone.play()
     }
 
-    private fun makeStatusNotification(message: String, context: Context) {
+    private fun makeStatusNotification(context: Context) {
 
         // Make a channel if necessary
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -78,7 +74,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(NOTIFICATION_TITLE)
-            .setContentText(message)
+            .setContentText("Alarm Activated")
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVibrate(LongArray(0))

@@ -6,13 +6,3 @@ data class User(
     val password: String = "",
     val userName:String =""
 )
-
-data class DeviceInfo(
-    val deviceId: String = "",
-    val deviceName: String = "",
-    val deviceToken: List<String> = emptyList(),
-    val location: String = "",
-)
-
-
-data class RemoteCommand(val type: String = "", val data: String = "")

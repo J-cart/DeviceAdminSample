@@ -1,7 +1,11 @@
 package com.tutorials.deviceadminsample
 
 import android.app.TimePickerDialog
+import android.content.ContentResolver
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -17,9 +21,13 @@ import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.ActionConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.AuthConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.FragmentDeviceBinding
+import com.tutorials.deviceadminsample.model.DeviceInfo
+import com.tutorials.deviceadminsample.model.RemoteCommand
 import com.tutorials.deviceadminsample.model.Resource
+import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.util.*
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,6 +37,8 @@ class DeviceFragment : Fragment() {
     private val viewModel: LockViewModel by activityViewModels()
     private val fUser = Firebase.auth.currentUser
     private val args by navArgs<DeviceFragmentArgs>()
+    private lateinit var user: User
+    private lateinit var deviceInfo: DeviceInfo
 
 
     override fun onCreateView(
@@ -73,7 +83,6 @@ class DeviceFragment : Fragment() {
 
             Log.d("TIMER2", "${myCalendar.time}")
             Log.d("TIMER3", "${myCalendar.timeInMillis}")
-            //viewModel.sendPushNotifier(user.copy(commandType = ALARM, alarmTime = myCalendar.timeInMillis.toString()))
 
             showActionDialog(ALARM, myCalendar)
             binding.deviceCountText.text =
@@ -105,23 +114,33 @@ class DeviceFragment : Fragment() {
         binding.apply {
             Glide.with(requireContext()).load(R.raw.action).into(binding.iconImg)
             if (text == ALARM) {
-                infoText.text = "You are about to set an alarm on DEVICE at ${SimpleDateFormat(
+                infoText.text = "You are about to set an alarm on ${deviceInfo.deviceName} at ${SimpleDateFormat(
                 TIME_FORMAT_ONE,
                 Locale.getDefault()
                 ).format(calendar?.time)
             }"
-                confirmationText.text = "Yes,set alarm"
+                confirmationText.text = "Yes, set alarm"
+                confirmationText.setOnClickListener {
+                    val remoteCommand = RemoteCommand(type = ALARM, data = calendar?.timeInMillis.toString())
+                    viewModel.sendPushNotifier(user, deviceInfo, remoteCommand)
+
+                    newDialog.dismiss()
+                }
             } else {
-                infoText.text = "You are about to lock DEVICE "
-                confirmationText.text = "Yes,lock device"
+                infoText.text = "You are about to lock ${deviceInfo.deviceName} "
+                confirmationText.text = "Yes, lock device"
+                confirmationText.setOnClickListener {
+                    val remoteCommand = RemoteCommand(type = LOCK)
+                    viewModel.sendPushNotifier(user, deviceInfo, remoteCommand)
+
+                    newDialog.dismiss()
+                }
             }
 
             declineBtn.setOnClickListener {
                 newDialog.dismiss()
             }
-            confirmationText.setOnClickListener {
-                newDialog.dismiss()
-            }
+
         }
     }
 
@@ -159,6 +178,7 @@ class DeviceFragment : Fragment() {
                         //display result
 
                         resource.data?.let {
+                            deviceInfo = it
                             binding.apply {
                                 deviceCountText.text = "Total Devices - OK.."
                                 nameText.text = it.deviceName
@@ -192,6 +212,7 @@ class DeviceFragment : Fragment() {
                 when (state) {
                     is Resource.Successful -> {
                         state.data?.let {
+                            user = it
                             if (it.userName.isNotEmpty()){
                                 binding.helloText.text = "Hello ${it.userName}"
                                 binding.infoText.text = "Welcome back ${it.userName}"

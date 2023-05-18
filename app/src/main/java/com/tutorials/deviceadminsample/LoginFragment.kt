@@ -168,7 +168,6 @@ class LoginFragment : Fragment() {
                                 if (findNavController().currentDestination?.id == R.id.loginFragment) {
                                     findNavController().navigate(navigate)
                                 }
-                                //findNavController().navigate(R.id.userFragment)
                             }
                             is RequestState.Failure -> {
                                 progressBar.isVisible = false

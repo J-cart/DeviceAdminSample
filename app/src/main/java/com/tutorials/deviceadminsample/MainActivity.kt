@@ -25,8 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private val fireStoreRef = Firebase.firestore.collection(USERS)
-    private var deviceToken: String? = null
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,20 +44,6 @@ class MainActivity : AppCompatActivity() {
         val fragHost = supportFragmentManager.findFragmentById(R.id.fragHost) as NavHostFragment
         navController = fragHost.findNavController()
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            //some thing
-        }
-
-        Log.d("RemoteLocker", "onCreate:BOARD: ${Build.BOARD}")
-        Log.d("RemoteLocker", "onCreate: BRAND: ${Build.BRAND}")
-        Log.d("RemoteLocker", "onCreate: DEVICE: ${Build.DEVICE}")
-        Log.d("RemoteLocker", "onCreate: ID: ${Build.ID}")
-        Log.d("RemoteLocker", "onCreate: MANUFACTURER: ${Build.MANUFACTURER}")
-        Log.d("RemoteLocker", "onCreate: MODEL: ${Build.MODEL}")
-        Log.d("RemoteLocker", "onCreate: PRODUCT: ${Build.PRODUCT}")
-
-        //brand + model
-
         val msg = "You need to allow permission for app to work properly"
         val title = "ACCEPT ADMIN REQUEST"
 
@@ -70,7 +55,6 @@ class MainActivity : AppCompatActivity() {
                     .putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin)
                 startActivity(intent2)
             }
-            return
         }
 
     }

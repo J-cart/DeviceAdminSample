@@ -19,6 +19,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.tutorials.deviceadminsample.*
 import com.tutorials.deviceadminsample.model.DeviceInfo
+import com.tutorials.deviceadminsample.model.RemoteCommand
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.util.*
 import com.tutorials.deviceadminsample.worker.AdminCommandWorker
@@ -36,22 +37,25 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        makeStatusNotification(message.data.toString(), this)
+        val type = message.data["type"].toString()
+        val data = message.data["data"]
+        makeStatusNotification(type, this)
+
         Log.d("CLOUD_MSG", "${message.data}")
-        Log.d("CLOUD_MSG", "messageType--> ${message.data["messageType"]}")
+        Log.d("CLOUD_MSG", "messageType--> ${message.data["type"]}")
+        Log.d("CLOUD_MSG", "messageData--> ${message.data["data"]}")
 
 
-        when (message.data["commandType"]) {
+        when (type) {
             ALARM -> {
-                upcomingAlarmTime.value = message.data["alarmTime"]!!.toLong()
                 val alarmData =
                     Data.Builder().putString(COMMAND_TYPE, ALARM)
-                        .putLong(ALARM_TIME, message.data["alarmTime"]!!.toLong()).build()
+                        .putLong(ALARM_TIME, data?.toLong() ?: 0L).build()
                 val workOne =
                     OneTimeWorkRequestBuilder<AdminCommandWorker>().setInputData(alarmData)
                         .build()
                 WorkManager.getInstance(this)
-                    .beginUniqueWork("TestWork", ExistingWorkPolicy.KEEP, workOne)
+                    .beginUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, workOne)
                     .enqueue()
 
             }
@@ -61,7 +65,7 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
                 val workOne = OneTimeWorkRequestBuilder<AdminCommandWorker>().setInputData(lockData)
                     .build()
                 WorkManager.getInstance(this)
-                    .beginUniqueWork("TestWork", ExistingWorkPolicy.KEEP, workOne)
+                    .beginUniqueWork(WORK_NAME, ExistingWorkPolicy.KEEP, workOne)
                     .enqueue()
 
             }
@@ -98,7 +102,7 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(NOTIFICATION_TITLE)
-            .setContentText(message)
+            .setContentText("Action Delivered, $message")
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVibrate(LongArray(0))
@@ -108,7 +112,6 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
     }
 
     companion object {
-        var upcomingAlarmTime = MutableStateFlow(0L)
 
         fun updateDeviceToken(context: Context, token: String,deviceInfo: DeviceInfo= DeviceInfo()) {
             Firebase.auth.currentUser?.let { currentUser ->
@@ -133,7 +136,7 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
                                                 context.showToast("Token Updated Successfully")
                                                 Log.d("me_updateToken", " ${it.result}")
                                             } else {
-                                                context.showToast("Error:Token Not Updated:->${it.exception}")
+                                                context.showToast("Oops..Token Not Updated:->${it.exception?.message}")
                                                 Log.d("me_updateToken", " ${it.exception}")
                                             }
 
@@ -143,10 +146,10 @@ class FirebaseMessagingReceiver : FirebaseMessagingService() {
                             }
                            fStoreUsers.document(email).collection(DEVICES).document(deviceInfo.deviceId).set(deviceInfo).await()
                             Log.d("me_updateToken", " Document Doesn't exist but updating new info...")
-                            context.showToast("Oops...Document Doesn't exist but updating new info...")
+                            context.showToast("Oops...Document doesn't exist but updating new info...")
                         }catch (e:Exception){
                             Log.d("me_updateToken", "Exception:-> $e")
-                            context.showToast("Ooops...Token Not Updated:->$e")
+                            context.showToast("Oops...Token Not Updated:->${e.message}")
 
                         }
                     }

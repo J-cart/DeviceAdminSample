@@ -40,7 +40,6 @@ class AllDevicesFragment : Fragment() {
     private val viewModel: LockViewModel by activityViewModels()
     private val deviceAdapter by lazy { AllDevicesAdapter() }
     private val fUser = Firebase.auth.currentUser
-    private var cityName = "Not Innit."
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
@@ -48,7 +47,7 @@ class AllDevicesFragment : Fragment() {
     private val locationRequest =
         LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, 120000L).apply {
             setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-            setMinUpdateIntervalMillis(10000L)//5mins-300000L
+            setMinUpdateIntervalMillis(10000L)
 
         }.build()
 
@@ -58,7 +57,6 @@ class AllDevicesFragment : Fragment() {
             val location = p0.lastLocation
             Log.d("LOCATING", "Location CallBack $location")
             location?.let {
-                // assign values
                 getCityName(it.longitude, it.latitude)
             }
 
@@ -258,23 +256,21 @@ class AllDevicesFragment : Fragment() {
     private fun getCityName(lon: Double, lat: Double) {
         lifecycleScope.launch(Dispatchers.IO) {
             val geoCoder = Geocoder(requireContext(), Locale.getDefault())
-            val address = geoCoder.getFromLocation(lat, lon, 1)
 
             try {
-                cityName = (address[0].subLocality
-                    ?: address[0].subAdminArea) + ", " + address[0].locality + ", " + address[0].adminArea
+                val address = geoCoder.getFromLocation(lat, lon, 1)
                 val sCityName = (address[0].subLocality
                     ?: address[0].subAdminArea) + ", " + address[0].locality + ", " + address[0].adminArea
+                Log.d("City Name", "getCityName: $sCityName")
                 fUser?.email?.let {
                     viewModel.updateUserLocation(it, sCityName)
                 }
 
             } catch (e: Exception) {
-                cityName = ""
                 Log.d("City Name Exception", "getCityName: ${e.message}")
             }
         }
-        Log.d("City Name", "getCityName: $cityName")
+
     }
 
     private val permissionsRequestLauncher: ActivityResultLauncher<Array<String>> =

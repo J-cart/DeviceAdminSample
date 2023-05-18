@@ -9,6 +9,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.Gson
 import com.tutorials.deviceadminsample.model.*
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateDeviceToken
 import com.tutorials.deviceadminsample.util.*
@@ -16,12 +17,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 class LockViewModel : ViewModel() {
 
     private val fAuth = Firebase.auth
     private val fStoreUsers = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
-    private val fStoreAdmin = Firebase.firestore.collection(USERS).document(ADMIN).collection("ALL")
 
     private val _signUpState = MutableStateFlow<RequestState>(RequestState.NonExistent)
     val signUpState = _signUpState.asStateFlow()
@@ -77,7 +87,7 @@ class LockViewModel : ViewModel() {
                 _signUpState.value = RequestState.Successful(true)
                 Log.d("me_addUsers", "SUCCESS ALl TRANSACTION COMPLETED")
             } catch (e: Exception) {
-                _signUpState.value = RequestState.Failure("$e")
+                _signUpState.value = RequestState.Failure("${e.message}")
                 Log.d("me_addUsers", "ERROR--->$e")
             }
         }
@@ -108,7 +118,7 @@ class LockViewModel : ViewModel() {
                 _loginState.value = RequestState.Successful(true)
                 Log.d("me_login", "SUCCESS ALl TRANSACTION COMPLETED")
             } catch (e: Exception) {
-                _loginState.value = RequestState.Failure("$e")
+                _loginState.value = RequestState.Failure("${e.message}")
                 Log.d("me_login", "ERROR--->$e")
             }
         }
@@ -153,54 +163,59 @@ class LockViewModel : ViewModel() {
     }
 
 
-    fun sendPushNotifier(user: User) {
-        /*   val body = Gson().toJson(user)
+    fun sendPushNotifier(user: User, deviceInfo: DeviceInfo, remoteCommand: RemoteCommand) {
 
-           val jsonObj = JSONObject()
-           jsonObj.put("to", user.deviceToken.last())
-           //jsonObj.put("notification", jsonNotifier)
-           jsonObj.put("data", JSONObject(body))
+        if (deviceInfo.deviceToken.last() == "0") {
+            Log.d("CLOUD_MSG", "ERROR-- device is offline")
+            return
+        }
 
+        val body = Gson().toJson(remoteCommand)
 
-           val request = okhttp3.Request.Builder()
-               .url(FCM_URL)
-               .addHeader("Content-Type", "application/json")
-               .addHeader(
-                   "Authorization",
-                   WEB_KEY
-               )
-               .post(
-                   jsonObj.toString().toRequestBody(
-                       "application/json; charset=utf-8".toMediaType()
-                   )
-               ).build()
+        val jsonObj = JSONObject()
+        jsonObj.put("to", deviceInfo.deviceToken.last())
+        //jsonObj.put("notification", jsonNotifier)
+        jsonObj.put("data", JSONObject(body))
 
 
-           val logger = HttpLoggingInterceptor()
-           logger.level = HttpLoggingInterceptor.Level.BASIC
-           OkHttpClient.Builder().addInterceptor(logger)
-               .connectTimeout(120, TimeUnit.SECONDS)
-               .readTimeout(120, TimeUnit.SECONDS)
-               .build().newCall(request)
-               .enqueue(object :
-                   Callback {
-                   override fun onFailure(call: Call, e: IOException) {
-                       Log.d("CLOUD_MSG", "onFailure-- $e")
-                   }
+        val request = okhttp3.Request.Builder()
+            .url(FCM_URL)
+            .addHeader("Content-Type", "application/json")
+            .addHeader(
+                "Authorization",
+                WEB_KEY
+            )
+            .post(
+                jsonObj.toString().toRequestBody(
+                    "application/json; charset=utf-8".toMediaType()
+                )
+            ).build()
 
-                   override fun onResponse(call: Call, response: Response) {
-                       if (user.commandType == ALARM) {
-                           // TODO: update alarm data in firestore
-                           updateUserAlarmTime(user.email, user.alarmTime)
-                       }
 
-                       Log.d(
-                           "CLOUD_MSG", "onResponse-- $response +++ " +
-                                   "${call.isExecuted()}====${response.isSuccessful}" +
-                                   "--${response.code}===${response.body}"
-                       )
-                   }
-               })*/
+        val logger = HttpLoggingInterceptor()
+        logger.level = HttpLoggingInterceptor.Level.BASIC
+        OkHttpClient.Builder().addInterceptor(logger)
+            .connectTimeout(120, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .build().newCall(request)
+            .enqueue(object :
+                Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.d("CLOUD_MSG", "onFailure-- $e")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    Log.d(
+                        "CLOUD_MSG", "onResponse-- $response +++ " +
+                                "${call.isExecuted()}====${response.isSuccessful}" +
+                                "--${response.code}===${response.body}"
+                    )
+                    if (response.isSuccessful || response.code == 200) {
+                        addToDeviceCommandList(user.email, deviceInfo.deviceId, remoteCommand)
+                    }
+
+                }
+            })
 
     }
 
@@ -250,25 +265,18 @@ class LockViewModel : ViewModel() {
         _currentUserDeviceInfo.value = Resource.Loading()
     }
 
-    private fun updateUserAlarmTime(email: String, time: String) {
+    fun addToDeviceCommandList(email: String, deviceId: String, remoteCommand: RemoteCommand) {
         viewModelScope.launch {
             try {
-                fStoreUsers.document(email)
-                    .update("alarmTime", time)
-                    .addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            Log.d("me_updateAlarm", " ${it.result}")
-                        } else {
-                            Log.d("me_updateAlarm", " ${it.exception}")
-                        }
-
-                    }
-
-                Log.d("me_updateAlarm", "SUCCESS")
+                fStoreUsers.document(email).collection(DEVICES)
+                    .document(deviceId).collection(COMMANDS)
+                    .document(System.currentTimeMillis().toString()).set(remoteCommand).await()
+                Log.d("me_updateCommand", "Successful...")
             } catch (e: Exception) {
-                Log.d("me_updateAlarm", "ERROR--->$e")
+                Log.d("me_updateCommand", "ERROR--->$e")
             }
         }
+
     }
 
     fun getCurrentUserDeviceInfo(email: String, deviceId: String) {
