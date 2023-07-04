@@ -27,8 +27,8 @@
         android:layout_marginEnd="37dp"
         android:background="@drawable/profile_img_background"
         android:clipToOutline="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/profile_img"
+        android:scaleType="centerCrop"
+        android:src="@drawable/account_avatar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/hello_text" />
 

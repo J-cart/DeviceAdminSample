@@ -1,14 +1,19 @@
 package com.tutorials.deviceadminsample.arch
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.load
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.tutorials.deviceadminsample.model.*
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateDeviceToken
@@ -32,6 +37,7 @@ class LockViewModel : ViewModel() {
 
     private val fAuth = Firebase.auth
     private val fStoreUsers = Firebase.firestore.collection(USERS).document(USER).collection("ALL")
+    private val fStorage = FirebaseStorage.getInstance().reference.child(USERS)
 
     private val _signUpState = MutableStateFlow<RequestState>(RequestState.NonExistent)
     val signUpState = _signUpState.asStateFlow()
@@ -51,6 +57,13 @@ class LockViewModel : ViewModel() {
 
     private val _currentUserInfo = MutableStateFlow<Resource<User>>(Resource.Loading())
     val currentUserInfo = _currentUserInfo.asStateFlow()
+
+    private val _updateDetailsStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
+    val updateDetailsStatusFlow = _updateDetailsStatusFlow.asStateFlow()
+
+    private val _updateProfImgStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
+    val updateProfImgStatusFlow = _updateProfImgStatusFlow.asStateFlow()
+
 
     sealed class UserEvents {
         object Successful : UserEvents()
@@ -324,4 +337,100 @@ class LockViewModel : ViewModel() {
             )
         }
     }
+
+
+    fun updateUserDetails(user: User) {
+        _updateDetailsStatusFlow.value = RequestState.Loading
+        viewModelScope.launch {
+            try {
+                fStoreUsers.document(user.email).set(user).await()
+                _updateDetailsStatusFlow.value = RequestState.Successful(true)
+            } catch (e: Exception) {
+                Log.d("me_updateUserInfo", "updateUserInfo: some error occurred $e")
+                _updateDetailsStatusFlow.value = RequestState.Failure(e.message.toString())
+            }
+            _updateDetailsStatusFlow.value = RequestState.NonExistent
+            return@launch
+        }
+    }
+
+
+    fun updateProfileImage(email: String, uri: Uri) {
+        _updateProfImgStatusFlow.value = RequestState.Loading
+
+        viewModelScope.launch {
+            try {
+                fStorage.child(email).putFile(uri).await()
+                val url = fStorage.child(email).downloadUrl.await()
+                fStoreUsers.document(email).update("imageUrl", url.toString()).await()
+                _updateProfImgStatusFlow.value = RequestState.Successful(true)
+            } catch (e: Exception) {
+                _updateProfImgStatusFlow.value = RequestState.Failure(e.message.toString())
+            }
+            _updateProfImgStatusFlow.value = RequestState.NonExistent
+        }
+
+    }
+
+    private val _resetPasswordStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
+    val resetPasswordStatusFlow = _resetPasswordStatusFlow.asStateFlow()
+    fun resetPassword(user: User, newPassword: String) {
+        _resetPasswordStatusFlow.value = RequestState.Loading
+        viewModelScope.launch {
+            try {
+                fAuth.currentUser?.let {fUser->
+                    val auth =
+                        fUser.reauthenticate(
+                            EmailAuthProvider.getCredential(
+                                user.email,
+                                user.password
+                            )
+                        ).await()
+                    fUser.updatePassword(newPassword).await()
+                    fStoreUsers.document(user.email).update("password",newPassword).await()
+                    _resetPasswordStatusFlow.value = RequestState.Successful(true)
+                }
+
+
+            } catch (e: Exception) {
+                _resetPasswordStatusFlow.value = RequestState.Failure(e.message.toString())
+            }
+
+            _resetPasswordStatusFlow.value = RequestState.NonExistent
+
+        }
+
+    }
+
+
+/*
+    fun updateUserDetails(email: String, user: User) {
+        _updateDetailsStatusFlow.value = RequestState.Loading
+        viewModelScope.launch {
+            if (_currentUserInfo.value is Resource.Successful) {
+                try {
+                    _currentUserInfo.value.data?.let {
+                        val userDetailMap = HashMap<String,String>()
+                        userDetailMap["fullName"] = user.fullName
+                        userDetailMap["userName"] = user.userName
+                        fStoreUsers.document(email).update(userDetailMap.toMap()).await()
+//                        fStoreUsers.document(email).set(user).await()
+                        _updateDetailsStatusFlow.value = RequestState.Successful(true)
+                    }
+                } catch (e: Exception) {
+                    Log.d("me_updateUserInfo", "updateUserInfo: some error occurred $e")
+                    _updateDetailsStatusFlow.value = RequestState.Failure(e.message.toString())
+                }
+                _updateDetailsStatusFlow.value = RequestState.NonExistent
+                return@launch
+            }
+            Log.d(
+                "me_updateUserInfo",
+                "updateUserInfo: some error occurred -- no current user data"
+            )
+            _updateDetailsStatusFlow.value = RequestState.Failure("No user logged in ...")
+        }
+        _updateDetailsStatusFlow.value = RequestState.NonExistent
+    }
+*/
 }

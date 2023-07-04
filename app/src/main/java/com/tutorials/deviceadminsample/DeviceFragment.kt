@@ -9,10 +9,14 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import coil.load
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
@@ -60,6 +64,7 @@ class DeviceFragment : Fragment() {
 
             observeDeviceCurrentUserInfo()
             observeCurrentSelectedDevice()
+            observeAllDevicesCount()
             binding.apply {
                 alarmBtn.setOnClickListener {
                     //showConfirmationDialog()
@@ -67,6 +72,10 @@ class DeviceFragment : Fragment() {
                 }
                 lockText.setOnClickListener {
                     showActionDialog(LOCK)
+                }
+                profileImg.setOnClickListener {
+                    val route = DeviceFragmentDirections.actionUserFragmentToSettingsFragment()
+                    findNavController().navigate(route)
                 }
             }
         } ?: Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
@@ -85,8 +94,6 @@ class DeviceFragment : Fragment() {
             Log.d("TIMER3", "${myCalendar.timeInMillis}")
 
             showActionDialog(ALARM, myCalendar)
-            binding.deviceCountText.text =
-                SimpleDateFormat(TIME_FORMAT_ONE, Locale.getDefault()).format(myCalendar.time)
         }
         TimePickerDialog(
             context,
@@ -114,14 +121,16 @@ class DeviceFragment : Fragment() {
         binding.apply {
             Glide.with(requireContext()).load(R.raw.action).into(binding.iconImg)
             if (text == ALARM) {
-                infoText.text = "You are about to set an alarm on ${deviceInfo.deviceName} at ${SimpleDateFormat(
-                TIME_FORMAT_ONE,
-                Locale.getDefault()
-                ).format(calendar?.time)
-            }"
+                infoText.text = "You are about to set an alarm on ${deviceInfo.deviceName} at ${
+                    SimpleDateFormat(
+                        TIME_FORMAT_ONE,
+                        Locale.getDefault()
+                    ).format(calendar?.time)
+                }"
                 confirmationText.text = "Yes, set alarm"
                 confirmationText.setOnClickListener {
-                    val remoteCommand = RemoteCommand(type = ALARM, data = calendar?.timeInMillis.toString())
+                    val remoteCommand =
+                        RemoteCommand(type = ALARM, data = calendar?.timeInMillis.toString())
                     viewModel.sendPushNotifier(user, deviceInfo, remoteCommand)
 
                     newDialog.dismiss()
@@ -166,21 +175,14 @@ class DeviceFragment : Fragment() {
     private fun observeCurrentSelectedDevice() {
         lifecycleScope.launch {
             viewModel.currentSelectedDeviceInfo.collect { resource ->
+                binding.progressBar.isVisible = resource is Resource.Loading
                 when (resource) {
-                    is Resource.Loading -> {
-                        //show Loading
-                        binding.apply {
-
-                            deviceCountText.text = "Total Devices - Loading.."
-                        }
-                    }
                     is Resource.Successful -> {
                         //display result
 
                         resource.data?.let {
                             deviceInfo = it
                             binding.apply {
-                                deviceCountText.text = "Total Devices - OK.."
                                 nameText.text = it.deviceName
                                 ringText.text = "Some time ago."
                                 statusText.text =
@@ -195,10 +197,11 @@ class DeviceFragment : Fragment() {
                         //show error
                         resource.msg?.let {
                             binding.apply {
-                                deviceCountText.text = "Total Devices - 0"
+                                deviceCountText.text = "Total Devices - ~~~"
                             }
                         }
                     }
+                    else->Unit
                 }
 
             }
@@ -213,9 +216,17 @@ class DeviceFragment : Fragment() {
                     is Resource.Successful -> {
                         state.data?.let {
                             user = it
-                            if (it.userName.isNotEmpty()){
-                                binding.helloText.text = "Hello ${it.userName}"
+                            if (it.userName.isNotEmpty()) {
+                                binding.helloText.text = "Hello ${it.userName} 👋"
                                 binding.infoText.text = "Welcome back ${it.userName}"
+                                if (it.imageUrl.isEmpty()) {
+                                    binding.profileImg.setImageResource(R.drawable.account_avatar)
+                                } else {
+                                    binding.profileImg.load(it.imageUrl.toUri()) {
+                                        crossfade(true)
+                                        error(R.drawable.cloud_error_)
+                                    }
+                                }
                             }
 
                         } ?: requireContext().showToast("User Device Info Not Available")
@@ -232,4 +243,15 @@ class DeviceFragment : Fragment() {
     }
 
 
+    private fun observeAllDevicesCount() {
+        lifecycleScope.launch {
+            viewModel.allDevices.collect { resource ->
+                if (resource is Resource.Successful) {
+                    binding.deviceCountText.text = "Total Devices - ${resource.data?.size ?: "~~"}"
+                }
+            }
+
+
+        }
+    }
 }

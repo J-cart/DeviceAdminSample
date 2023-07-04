@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.arch.LockViewModel
@@ -25,6 +26,18 @@ class ForgotPasswordFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.undoBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        binding.sendBtn.setOnClickListener {
+            val route = ForgotPasswordFragmentDirections.actionForgotPasswordFragmentToOtpVerificationFragment()
+            findNavController().navigate(route)
+        }
     }
 
 }

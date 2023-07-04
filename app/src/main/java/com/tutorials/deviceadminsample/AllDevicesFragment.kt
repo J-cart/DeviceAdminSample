@@ -11,6 +11,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import coil.load
 import com.google.android.gms.location.*
 import com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -96,12 +98,16 @@ class AllDevicesFragment : Fragment() {
             observeAllDevices()
             binding.recyclerView.adapter = deviceAdapter
             observeDeviceCurrentUserInfo()
-            observeDeviceCurrentUserDeviceInfo()
 
             deviceAdapter.adapterClick {
                 val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment(it.deviceId)
                 findNavController().navigate(action)
             }
+            binding.profileImg.setOnClickListener {
+                val route = AllDevicesFragmentDirections.actionAllUsersToSettingsFragment()
+                findNavController().navigate(route)
+            }
+
         } ?: noUserAvailable()
 
 
@@ -109,39 +115,6 @@ class AllDevicesFragment : Fragment() {
 
     }
 
-    private fun observeDeviceCurrentUserDeviceInfo() {
-        lifecycleScope.launch {
-            viewModel.currentUserDeviceInfo.collect { state ->
-                when (state) {
-                    is Resource.Successful -> {
-                        binding.helloText.setOnClickListener {
-                            state.data?.let {
-                                FirebaseMessagingReceiver.updateDeviceToken(
-                                    requireContext(),
-                                    "0",
-                                    it
-                                )
-                                Firebase.auth.signOut().also {
-                                    val navigate =
-                                        AllDevicesFragmentDirections.actionAllUsersToLoginFragment()
-                                    findNavController().navigate(navigate)
-                                    viewModel.resetOnSignOut()
-                                }
-                            } ?: requireContext().showToast("User Device Info Not Available")
-
-                        }
-
-                    }
-                    is Resource.Failure -> {
-                        state.msg?.let { requireContext().showToast(it) }
-                    }
-                    else -> Unit
-                }
-
-            }
-        }
-
-    }
 
     private fun observeDeviceCurrentUserInfo() {
         lifecycleScope.launch {
@@ -150,11 +123,19 @@ class AllDevicesFragment : Fragment() {
                     is Resource.Successful -> {
                         state.data?.let {
                             if (it.userName.isNotEmpty()){
-                                binding.helloText.text = "Hello ${it.userName}"
+                                binding.helloText.text = "Hello ${it.userName} 👋"
                                 binding.infoText.text = "Welcome back ${it.userName}"
+                                if (it.imageUrl.isEmpty()) {
+                                    binding.profileImg.setImageResource(R.drawable.account_avatar)
+                                } else {
+                                    binding.profileImg.load(it.imageUrl.toUri()) {
+                                        crossfade(true)
+                                        error(R.drawable.cloud_error_)
+                                    }
+                                }
                             }
 
-                        } ?: requireContext().showToast("User Device Info Not Available")
+                        } ?: requireContext().showToast("User Info Not Available")
                     }
                     is Resource.Failure -> {
                         state.msg?.let { requireContext().showToast(it) }
@@ -222,29 +203,6 @@ class AllDevicesFragment : Fragment() {
 
             }
         }
-    }
-
-    private fun newMenu() {
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.user_menu, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.logoutMenu -> {
-                        FirebaseMessagingReceiver.updateDeviceToken(requireContext(), "0")
-                        Firebase.auth.signOut().also {
-                            findNavController().navigate(R.id.loginFragment)
-                            viewModel.resetOnSignOut()
-                        }
-                        true
-                    }
-                    else -> false
-                }
-
-            }
-        }, viewLifecycleOwner, Lifecycle.State.STARTED)
     }
 
     private fun requestLocationUpdates() {

@@ -57,6 +57,11 @@ class LoginFragment : Fragment() {
                 binding.signUpLayout.root.isVisible = true
             }
 
+            forgotText.setOnClickListener {
+                val route = LoginFragmentDirections.actionLoginFragmentToForgotPasswordFragment()
+                findNavController().navigate(route)
+            }
+
             loginBtn.setOnClickListener {
 
                 lifecycleScope.launch {
@@ -82,7 +87,7 @@ class LoginFragment : Fragment() {
                                 progressBar.isVisible = false
                                 Toast.makeText(
                                     requireContext(),
-                                    "Login Successful--> ${it.data}",
+                                    "Login Successful",
                                     Toast.LENGTH_SHORT
                                 ).show()
 
@@ -94,7 +99,7 @@ class LoginFragment : Fragment() {
                                 progressBar.isVisible = false
                                 Toast.makeText(
                                     requireContext(),
-                                    "Error--> ${it.msg}",
+                                    "Oops...${it.msg}",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -160,7 +165,7 @@ class LoginFragment : Fragment() {
                                 progressBar.isVisible = false
                                 Toast.makeText(
                                     requireContext(),
-                                    "SignUp Successful--> ${it.data}",
+                                    "SignUp Successful",
                                     Toast.LENGTH_SHORT
                                 ).show()
 
@@ -173,7 +178,7 @@ class LoginFragment : Fragment() {
                                 progressBar.isVisible = false
                                 Toast.makeText(
                                     requireContext(),
-                                    "Error--> ${it.msg}",
+                                    "Oops...${it.msg}",
                                     Toast.LENGTH_SHORT
                                 )
                                     .show()
