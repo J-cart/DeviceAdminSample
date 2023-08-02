@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample.onboarding
+package com.tutorials.deviceadminsample.ui.onboarding
 
 import android.content.Context
 import android.view.LayoutInflater

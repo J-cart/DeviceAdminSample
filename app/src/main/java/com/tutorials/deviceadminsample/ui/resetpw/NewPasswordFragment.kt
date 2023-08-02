@@ -1,22 +1,20 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui.resetpw
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.arch.LockViewModel
-import com.tutorials.deviceadminsample.databinding.FragmentForgotPasswordBinding
-import com.tutorials.deviceadminsample.databinding.FragmentLoginBinding
+import com.tutorials.deviceadminsample.databinding.FragmentNewPasswordBinding
 
-class ForgotPasswordFragment : Fragment() {
-    private var _binding: FragmentForgotPasswordBinding? = null
+class NewPasswordFragment : Fragment() {
+    private var _binding: FragmentNewPasswordBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LockViewModel by activityViewModels()
+
 
 
     override fun onCreateView(
@@ -24,7 +22,7 @@ class ForgotPasswordFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
+        _binding = FragmentNewPasswordBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -33,11 +31,11 @@ class ForgotPasswordFragment : Fragment() {
         binding.undoBtn.setOnClickListener {
             findNavController().navigateUp()
         }
-
-        binding.sendBtn.setOnClickListener {
-            val route = ForgotPasswordFragmentDirections.actionForgotPasswordFragmentToOtpVerificationFragment()
+        binding.createBtn.setOnClickListener {
+            val route = NewPasswordFragmentDirections.actionNewPasswordFragmentToLoginFragment()
             findNavController().navigate(route)
         }
+
     }
 
 }

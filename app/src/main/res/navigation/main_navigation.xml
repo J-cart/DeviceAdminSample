@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/allUsers"
-        android:name="com.tutorials.deviceadminsample.AllDevicesFragment"
+        android:name="com.tutorials.deviceadminsample.ui.AllDevicesFragment"
         android:label="Admin Account"
         tools:layout="@layout/fragment_all_devices" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.tutorials.deviceadminsample.LoginFragment"
+        android:name="com.tutorials.deviceadminsample.ui.LoginFragment"
         android:label="User Login"
         tools:layout="@layout/fragment_login">
 
@@ -35,7 +35,7 @@
     </fragment>
     <fragment
         android:id="@+id/userFragment"
-        android:name="com.tutorials.deviceadminsample.DeviceFragment"
+        android:name="com.tutorials.deviceadminsample.ui.DeviceFragment"
         android:label="User Account"
         tools:layout="@layout/fragment_device" >
         <argument
@@ -47,7 +47,7 @@
     </fragment>
     <fragment
         android:id="@+id/boardingFragment"
-        android:name="com.tutorials.deviceadminsample.onboarding.BoardingFragment"
+        android:name="com.tutorials.deviceadminsample.ui.onboarding.BoardingFragment"
         android:label="fragment_boarding"
         tools:layout="@layout/fragment_boarding" >
         <action
@@ -59,7 +59,7 @@
     </fragment>
     <fragment
         android:id="@+id/forgotPasswordFragment"
-        android:name="com.tutorials.deviceadminsample.ForgotPasswordFragment"
+        android:name="com.tutorials.deviceadminsample.ui.resetpw.ForgotPasswordFragment"
         android:label="fragment_forgot_password"
         tools:layout="@layout/fragment_forgot_password" >
         <action
@@ -68,7 +68,7 @@
     </fragment>
     <fragment
         android:id="@+id/newPasswordFragment"
-        android:name="com.tutorials.deviceadminsample.NewPasswordFragment"
+        android:name="com.tutorials.deviceadminsample.ui.resetpw.NewPasswordFragment"
         android:label="fragment_new_password"
         tools:layout="@layout/fragment_new_password" >
         <action
@@ -80,7 +80,7 @@
     </fragment>
     <fragment
         android:id="@+id/otpVerificationFragment"
-        android:name="com.tutorials.deviceadminsample.OtpVerificationFragment"
+        android:name="com.tutorials.deviceadminsample.ui.resetpw.OtpVerificationFragment"
         android:label="fragment_otp_verification"
         tools:layout="@layout/fragment_otp_verification" >
         <action
@@ -89,7 +89,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.tutorials.deviceadminsample.SettingsFragment"
+        android:name="com.tutorials.deviceadminsample.ui.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" >
         <action

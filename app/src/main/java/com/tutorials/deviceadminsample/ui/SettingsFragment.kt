@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui
 
 import android.app.Activity
 import android.content.Intent
@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import coil.load
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.R
 import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentSettingsBinding
 import com.tutorials.deviceadminsample.model.RequestState

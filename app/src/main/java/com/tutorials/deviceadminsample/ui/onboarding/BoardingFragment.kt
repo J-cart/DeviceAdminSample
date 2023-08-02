@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample.onboarding
+package com.tutorials.deviceadminsample.ui.onboarding
 
 import android.Manifest
 import android.os.Bundle

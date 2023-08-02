@@ -1,13 +1,11 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui
 
 import android.app.TimePickerDialog
-import android.content.ContentResolver
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
@@ -21,6 +19,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.R
 import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.ActionConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.AuthConfirmationDialogBinding
@@ -31,7 +30,6 @@ import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.util.*
 import kotlinx.coroutines.launch
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -1,21 +1,17 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui
 
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.R
 import com.tutorials.deviceadminsample.databinding.ActivityMainBinding
 import com.tutorials.deviceadminsample.receiver.SampleAdminReceiver
 import com.tutorials.deviceadminsample.util.*

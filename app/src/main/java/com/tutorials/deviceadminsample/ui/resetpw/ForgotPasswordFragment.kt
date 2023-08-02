@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui.resetpw
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,13 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.tutorials.deviceadminsample.arch.LockViewModel
-import com.tutorials.deviceadminsample.databinding.FragmentNewPasswordBinding
+import com.tutorials.deviceadminsample.databinding.FragmentForgotPasswordBinding
 
-class NewPasswordFragment : Fragment() {
-    private var _binding: FragmentNewPasswordBinding? = null
+class ForgotPasswordFragment : Fragment() {
+    private var _binding: FragmentForgotPasswordBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LockViewModel by activityViewModels()
-
 
 
     override fun onCreateView(
@@ -22,7 +21,7 @@ class NewPasswordFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentNewPasswordBinding.inflate(inflater, container, false)
+        _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -31,11 +30,12 @@ class NewPasswordFragment : Fragment() {
         binding.undoBtn.setOnClickListener {
             findNavController().navigateUp()
         }
-        binding.createBtn.setOnClickListener {
-            val route = NewPasswordFragmentDirections.actionNewPasswordFragmentToLoginFragment()
+
+        binding.sendBtn.setOnClickListener {
+            val route =
+                ForgotPasswordFragmentDirections.actionForgotPasswordFragmentToOtpVerificationFragment()
             findNavController().navigate(route)
         }
-
     }
 
 }

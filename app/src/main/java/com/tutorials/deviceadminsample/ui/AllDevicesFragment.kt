@@ -1,4 +1,4 @@
-package com.tutorials.deviceadminsample
+package com.tutorials.deviceadminsample.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -14,11 +14,9 @@ import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
-import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import coil.load
@@ -27,11 +25,12 @@ import com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tutorials.deviceadminsample.R
 import com.tutorials.deviceadminsample.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentAllDevicesBinding
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
-import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
+import com.tutorials.deviceadminsample.ui.rv_adapter.AllDevicesAdapter
 import com.tutorials.deviceadminsample.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
