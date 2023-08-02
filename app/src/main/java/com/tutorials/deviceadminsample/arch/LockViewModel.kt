@@ -15,6 +15,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
+import com.tutorials.deviceadminsample.BuildConfig
 import com.tutorials.deviceadminsample.model.*
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver.Companion.updateDeviceToken
 import com.tutorials.deviceadminsample.util.*
@@ -192,7 +193,7 @@ class LockViewModel : ViewModel() {
             .addHeader("Content-Type", "application/json")
             .addHeader(
                 "Authorization",
-                WEB_KEY
+                BuildConfig.WEB_KEY
             )
             .post(
                 jsonObj.toString().toRequestBody(

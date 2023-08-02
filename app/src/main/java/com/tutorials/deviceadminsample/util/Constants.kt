@@ -16,7 +16,6 @@ const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION =
     "Shows notifications whenever FCM sends messages"
 const val NOTIFICATION_TITLE = "Remote Locker"
 const val CHANNEL_ID = "DEVICE_ADMIN_SAMPLE_NOTIFICATION"
-const val WEB_KEY = "key =AAAAU4NEKao:APA91bHMiLRgIq8fQdoePbdWK9HuO7TwdheEVEshLC7GxT7VHy_4j1nMazZ1h0Y9_irzbU_rk5hnrPWbSk47APU0gYFVtgzA4SKZgyiMAUCfHq0xvm8ALvlfv0ZdzEgLOVq7GMvL_cig"
 const val FCM_URL = "https://fcm.googleapis.com/fcm/send"
 const val USERS ="ADMIN-LOCK"
 const val ADMIN_ACCESS ="ADMIN-ACCESS"
