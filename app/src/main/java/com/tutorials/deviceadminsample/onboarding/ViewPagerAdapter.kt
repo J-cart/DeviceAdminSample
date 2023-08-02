@@ -25,9 +25,9 @@ class ViewPagerAdapter(val context: Context) : PagerAdapter() {
         "Ring Your Device"
     )
      val descArray = arrayOf(
-            "Lorem ipsum dolor sit amet consectetur. Sit quis cras tellus nibh egestas mauris venenatis nibh. Fringilla dictum morbi non a.",
-            "Lorem ipsum dolor sit amet consectetur. Sit quis cras tellus nibh egestas mauris ",
-            "quis cras tellus nibh egestas mauris venenatis nibh. Fringilla dictum morbi non a."
+         "Stay Connected, Never Lost: Unlock the Power to Effortlessly Track Your Phone and Always Stay in Control of Your Device's Location!",
+         "Secure Your World, Anytime, Anywhere: Empower Yourself to Easily Lock Your Phone and Safeguard Your Personal Data!",
+         "Find Your Lost Phone in a Jiffy: Ring Your Phone with Confidence  and Never Let It Wander Far From Your Reach!"
         )
 
     override fun getCount(): Int {

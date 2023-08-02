@@ -64,12 +64,8 @@ class LockViewModel : ViewModel() {
     private val _updateProfImgStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
     val updateProfImgStatusFlow = _updateProfImgStatusFlow.asStateFlow()
 
-
-    sealed class UserEvents {
-        object Successful : UserEvents()
-        object Failure : UserEvents()
-        object Error : UserEvents()
-    }
+    private val _resetPasswordStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
+    val resetPasswordStatusFlow = _resetPasswordStatusFlow.asStateFlow()
 
     fun signUpNew(
         email: String,
@@ -372,8 +368,6 @@ class LockViewModel : ViewModel() {
 
     }
 
-    private val _resetPasswordStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
-    val resetPasswordStatusFlow = _resetPasswordStatusFlow.asStateFlow()
     fun resetPassword(user: User, newPassword: String) {
         _resetPasswordStatusFlow.value = RequestState.Loading
         viewModelScope.launch {
@@ -402,35 +396,4 @@ class LockViewModel : ViewModel() {
 
     }
 
-
-/*
-    fun updateUserDetails(email: String, user: User) {
-        _updateDetailsStatusFlow.value = RequestState.Loading
-        viewModelScope.launch {
-            if (_currentUserInfo.value is Resource.Successful) {
-                try {
-                    _currentUserInfo.value.data?.let {
-                        val userDetailMap = HashMap<String,String>()
-                        userDetailMap["fullName"] = user.fullName
-                        userDetailMap["userName"] = user.userName
-                        fStoreUsers.document(email).update(userDetailMap.toMap()).await()
-//                        fStoreUsers.document(email).set(user).await()
-                        _updateDetailsStatusFlow.value = RequestState.Successful(true)
-                    }
-                } catch (e: Exception) {
-                    Log.d("me_updateUserInfo", "updateUserInfo: some error occurred $e")
-                    _updateDetailsStatusFlow.value = RequestState.Failure(e.message.toString())
-                }
-                _updateDetailsStatusFlow.value = RequestState.NonExistent
-                return@launch
-            }
-            Log.d(
-                "me_updateUserInfo",
-                "updateUserInfo: some error occurred -- no current user data"
-            )
-            _updateDetailsStatusFlow.value = RequestState.Failure("No user logged in ...")
-        }
-        _updateDetailsStatusFlow.value = RequestState.NonExistent
-    }
-*/
 }

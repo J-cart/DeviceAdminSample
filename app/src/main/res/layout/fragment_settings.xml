@@ -60,7 +60,7 @@
             android:background="@drawable/profile_img_background"
             android:clipToOutline="true"
             android:scaleType="centerCrop"
-            android:src="@drawable/profile_img"
+            android:src="@drawable/account_avatar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title_text" />

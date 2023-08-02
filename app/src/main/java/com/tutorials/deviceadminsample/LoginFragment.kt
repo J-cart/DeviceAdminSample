@@ -2,11 +2,13 @@ package com.tutorials.deviceadminsample
 
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -24,7 +26,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: LockViewModel by activityViewModels()
     private val fUser = Firebase.auth.currentUser
-
+    private var exitAppToastStillShowing = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +39,10 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            isEnabled = true
+            exitApp()
+        }
         if (fUser != null) {
             val navigate = LoginFragmentDirections.actionLoginFragmentToAllUsers()
             findNavController().navigate(navigate)
@@ -189,6 +195,27 @@ class LoginFragment : Fragment() {
             }
         }
     }
+
+
+
+    private val exitAppTimer = object : CountDownTimer(2000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {}
+        override fun onFinish() {
+            exitAppToastStillShowing = false
+        }
+    }
+    private fun exitApp() {
+        if (exitAppToastStillShowing) {
+            requireActivity().finish()
+            return
+        }
+
+        Toast.makeText(this.requireContext(), "Tap again to exit", Toast.LENGTH_SHORT)
+            .show()
+        exitAppToastStillShowing = true
+        exitAppTimer.start()
+    }
+
 
 
 }

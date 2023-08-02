@@ -14,11 +14,6 @@
             android:id="@+id/action_allUsers_to_userFragment"
             app:destination="@id/userFragment" />
         <action
-            android:id="@+id/action_allUsers_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true" />
-        <action
             android:id="@+id/action_allUsers_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
@@ -57,7 +52,9 @@
         tools:layout="@layout/fragment_boarding" >
         <action
             android:id="@+id/action_boardingFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
 
     </fragment>
     <fragment

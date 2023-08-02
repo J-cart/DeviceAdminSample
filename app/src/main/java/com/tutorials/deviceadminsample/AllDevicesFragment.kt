@@ -5,10 +5,12 @@ import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Looper
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
@@ -42,7 +44,7 @@ class AllDevicesFragment : Fragment() {
     private val viewModel: LockViewModel by activityViewModels()
     private val deviceAdapter by lazy { AllDevicesAdapter() }
     private val fUser = Firebase.auth.currentUser
-
+    private var exitAppToastStillShowing = false
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
 
@@ -78,6 +80,10 @@ class AllDevicesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            isEnabled = true
+            exitApp()
+        }
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
         if (requireContext().checkPermissions()) {
@@ -263,6 +269,25 @@ class AllDevicesFragment : Fragment() {
         }
     }
 
+
+
+    private val exitAppTimer = object : CountDownTimer(2000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {}
+        override fun onFinish() {
+            exitAppToastStillShowing = false
+        }
+    }
+    private fun exitApp() {
+        if (exitAppToastStillShowing) {
+            requireActivity().finish()
+            return
+        }
+
+        Toast.makeText(this.requireContext(), "Tap again to exit", Toast.LENGTH_SHORT)
+            .show()
+        exitAppToastStillShowing = true
+        exitAppTimer.start()
+    }
 
    private fun noUserAvailable(){
         Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
