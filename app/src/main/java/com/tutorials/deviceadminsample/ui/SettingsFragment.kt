@@ -26,6 +26,7 @@ import com.tutorials.deviceadminsample.model.RequestState
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
+import com.tutorials.deviceadminsample.util.showAlert
 import com.tutorials.deviceadminsample.util.showToast
 import kotlinx.coroutines.launch
 
@@ -92,7 +93,13 @@ class SettingsFragment : Fragment() {
                                     }
                                 }
                                 updatePasswordText.setOnClickListener {
-                                    verifyAndResetPassword(user)
+                                    requireContext().showAlert(
+                                        "Update password",
+                                        "You are about to update your password, are you sure about this action?"
+                                    ){
+                                        verifyAndResetPassword(user)
+                                    }
+
                                 }
                             }
                             updateUserInfo(user)
@@ -213,6 +220,7 @@ class SettingsFragment : Fragment() {
                 }
                 return@registerForActivityResult
             }
+            requireContext().showToast("Unable to update profile image")
             Log.d("checker-dere", "error ${it.resultCode}")
 
         }
