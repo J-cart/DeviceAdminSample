@@ -16,9 +16,11 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.R
-import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.ui.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentLoginBinding
 import com.tutorials.deviceadminsample.model.RequestState
+import com.tutorials.deviceadminsample.util.NetworkStatus
+import com.tutorials.deviceadminsample.util.showToast
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
@@ -48,7 +50,23 @@ class LoginFragment : Fragment() {
             findNavController().navigate(navigate)
             return
         }
-        validateUser()
+        lifecycleScope.launch {
+            viewModel.connectionState.collect{
+                if (it == NetworkStatus.DISCONNECTED || it == NetworkStatus.IDLE ){
+                    binding.root.setOnClickListener {
+                        requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                    }
+                    requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                }else{
+
+                    validateUser()
+
+                }
+            }
+
+        }
+
+
 
     }
 

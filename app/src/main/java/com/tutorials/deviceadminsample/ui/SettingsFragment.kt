@@ -20,12 +20,13 @@ import coil.load
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.R
-import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.ui.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentSettingsBinding
 import com.tutorials.deviceadminsample.model.RequestState
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
 import com.tutorials.deviceadminsample.service.FirebaseMessagingReceiver
+import com.tutorials.deviceadminsample.util.NetworkStatus
 import com.tutorials.deviceadminsample.util.showAlert
 import com.tutorials.deviceadminsample.util.showToast
 import kotlinx.coroutines.launch
@@ -52,13 +53,35 @@ class SettingsFragment : Fragment() {
         binding.undoBtn.setOnClickListener {
             findNavController().navigateUp()
         }
+        lifecycleScope.launch {
+            viewModel.connectionState.collect{
+                binding.updateBtn.isClickable = it == NetworkStatus.CONNECTED
+                binding.logOutText.isClickable = it == NetworkStatus.CONNECTED
+                binding.updatePasswordText.isClickable = it == NetworkStatus.CONNECTED
+                binding.editImg.isClickable = it == NetworkStatus.CONNECTED
+                if (it == NetworkStatus.DISCONNECTED || it == NetworkStatus.IDLE ){
+                    binding.constraintLayout.setOnClickListener {
+                        requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                    }
+                    requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                }else{
+                    performAllOperation()
 
+                }
+            }
+
+        }
+
+        observeDeviceCurrentUserInfo()
+        observeDeviceCurrentUserDeviceInfo()
+        observeUpdateUserInfo()
+        observeResetPasswordState()
+
+    }
+    private fun performAllOperation(){
         fUser?.email?.let {
             viewModel.addDeviceUserInfoSnapshot(it)
-            observeDeviceCurrentUserInfo()
-            observeDeviceCurrentUserDeviceInfo()
-            observeUpdateUserInfo()
-            observeResetPasswordState()
+
             binding.editImg.setOnClickListener {
                 selectImage()
             }
@@ -71,7 +94,7 @@ class SettingsFragment : Fragment() {
                 }
             }
 
-        } ?: Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+        } ?: requireContext().showToast("No user logged in")
     }
 
     private fun observeDeviceCurrentUserInfo() {

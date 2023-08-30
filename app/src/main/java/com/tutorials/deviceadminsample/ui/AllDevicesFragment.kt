@@ -26,7 +26,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.R
-import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.ui.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentAllDevicesBinding
 import com.tutorials.deviceadminsample.model.Resource
 import com.tutorials.deviceadminsample.model.User
@@ -92,7 +92,27 @@ class AllDevicesFragment : Fragment() {
         }
 
         binding.profileImg.clipToOutline = true
+        observeDeviceCurrentUserInfo()
+        observeAllDevices()
+        lifecycleScope.launch {
+            viewModel.connectionState.collect{
+                binding.profileImg.isClickable = it == NetworkStatus.CONNECTED
+                if (it == NetworkStatus.DISCONNECTED || it == NetworkStatus.IDLE ){
+                    requireContext().showToast(it.name)
+                    showError("No connection detected, make sure to be connected to the internet")
+                }else{
+                    performAllOperations()
 
+                }
+            }
+
+        }
+
+
+
+    }
+
+    private fun performAllOperations(){
         fUser?.email?.let {
             viewModel.getCurrentUserInfo(it)
             viewModel.getAllUserDevice(it)
@@ -100,10 +120,8 @@ class AllDevicesFragment : Fragment() {
             viewModel.addDeviceUserInfoSnapshot(it)
             viewModel.getCurrentUserDeviceInfo(it, Build.ID)
 
-            observeAllDevices()
-            binding.recyclerView.adapter = deviceAdapter
-            observeDeviceCurrentUserInfo()
 
+            binding.recyclerView.adapter = deviceAdapter
             deviceAdapter.adapterClick {
                 val action = AllDevicesFragmentDirections.actionAllUsersToUserFragment(it.deviceId)
                 findNavController().navigate(action)
@@ -113,11 +131,7 @@ class AllDevicesFragment : Fragment() {
                 findNavController().navigate(route)
             }
 
-        } ?: noUserAvailable()
-
-
-
-
+        } ?: showError("No user logged in")
     }
 
 
@@ -196,10 +210,7 @@ class AllDevicesFragment : Fragment() {
                         //show error
                         resource.msg?.let {
                             binding.apply {
-                                errorText.isVisible = true
-                                errorText.text = it
-                                progressBar.isVisible = false
-                                recyclerView.isVisible = false
+                                showError(it)
                                 deviceCountText.text = "Total Devices - 0"
                             }
                         }
@@ -288,11 +299,10 @@ class AllDevicesFragment : Fragment() {
         exitAppTimer.start()
     }
 
-   private fun noUserAvailable(){
-        Toast.makeText(requireContext(), "No user logged in", Toast.LENGTH_SHORT).show()
+   private fun showError(message:String){
         binding.apply {
             errorText.isVisible = true
-            errorText.text = "No user Logged In..."
+            errorText.text = message
             recyclerView.isVisible = false
             progressBar.isVisible = false
 

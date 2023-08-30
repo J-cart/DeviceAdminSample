@@ -1,8 +1,12 @@
-package com.tutorials.deviceadminsample.arch
+package com.tutorials.deviceadminsample.ui.arch
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -67,6 +71,9 @@ class LockViewModel : ViewModel() {
 
     private val _resetPasswordStatusFlow = MutableStateFlow<RequestState>(RequestState.NonExistent)
     val resetPasswordStatusFlow = _resetPasswordStatusFlow.asStateFlow()
+
+    private val _connectionState = MutableStateFlow<NetworkStatus>(NetworkStatus.IDLE)
+    val connectionState = _connectionState.asStateFlow()
 
     fun signUpNew(
         email: String,
@@ -395,6 +402,15 @@ class LockViewModel : ViewModel() {
 
         }
 
+    }
+
+    fun checkNetworkState(context: Context) {
+        val observer = NetworkObserver(context)
+        viewModelScope.launch {
+            observer.observe().collect {
+                _connectionState.value = it
+            }
+        }
     }
 
 }

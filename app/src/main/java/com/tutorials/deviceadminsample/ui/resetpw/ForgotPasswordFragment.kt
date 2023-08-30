@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.ui.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.FragmentForgotPasswordBinding
 
 class ForgotPasswordFragment : Fragment() {

@@ -20,7 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.tutorials.deviceadminsample.R
-import com.tutorials.deviceadminsample.arch.LockViewModel
+import com.tutorials.deviceadminsample.ui.arch.LockViewModel
 import com.tutorials.deviceadminsample.databinding.ActionConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.AuthConfirmationDialogBinding
 import com.tutorials.deviceadminsample.databinding.FragmentDeviceBinding
@@ -56,13 +56,36 @@ class DeviceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.profileImg.clipToOutline = true
         val deviceId = args.deviceId
+        lifecycleScope.launch {
+            viewModel.connectionState.collect{
+
+                binding.profileImg.isClickable = it == NetworkStatus.CONNECTED
+                binding.alarmBtn.isClickable = it == NetworkStatus.CONNECTED
+                binding.lockText.isClickable = it == NetworkStatus.CONNECTED
+                if (it == NetworkStatus.DISCONNECTED || it == NetworkStatus.IDLE ){
+                    binding.root.setOnClickListener {
+                        requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                    }
+                    requireContext().showToast("No connection detected, make sure to be connected to the internet")
+                }else{
+                    performAllOperation(deviceId)
+
+                }
+            }
+
+        }
+
+        observeDeviceCurrentUserInfo()
+        observeCurrentSelectedDevice()
+        observeAllDevicesCount()
+    }
+
+    private fun performAllOperation(deviceId:String){
         fUser?.email?.let {
             viewModel.addDeviceSnapshot(it, deviceId)
             viewModel.addDeviceUserInfoSnapshot(it)
 
-            observeDeviceCurrentUserInfo()
-            observeCurrentSelectedDevice()
-            observeAllDevicesCount()
+
             binding.apply {
                 alarmBtn.setOnClickListener {
                     //showConfirmationDialog()
